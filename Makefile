@@ -144,6 +144,9 @@ qemu-nox-gdb: $(CERTIKOS_IMG) pre-qemu
 	@echo "***"
 	$(V)$(QEMU) -nographic $(QEMUOPTS) -S
 
+gdb: pre-qemu
+	@gdb
+
 qemu-kvm: $(CERTIKOS_IMG)
 	$(V)$(QEMU) $(QEMUOPTS) $(QEMUOPTS_KVM)
 
