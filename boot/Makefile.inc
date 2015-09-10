@@ -3,7 +3,7 @@
 BOOT_DIR	:= $(TOP)/boot
 
 # Compiling and Linking options for the bootloader
-BOOT_CFLAGS	:= $(CFLAGS) -Os -m32 -I.
+BOOT_CFLAGS	:= $(CFLAGS) -Os -g -m32 -I.
 BOOT_LDFLAGS	:= $(LDFLAGS) -m elf_i386
 
 BOOT_DEBUG	:= " "
