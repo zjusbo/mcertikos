@@ -1,0 +1,76 @@
+#
+# Top-level Makefile for certikos user processes
+#
+
+ifndef V
+V		:= @
+else
+V		:=
+endif
+
+ARCH		:= i386
+
+# Cross-compiler toolchain
+#
+# This Makefile will automatically use a cross-compiler toolchain installed
+# as 'pios-*' or 'i386-elf-*', if one exists.  If the host tools ('gcc',
+# 'objdump', and so forth) compile for a 32-bit x86 ELF target, that will
+# be detected as well.  If you have the right compiler toolchain installed
+# using a different name, set GCCPREFIX explicitly in conf/env.mk
+
+# try to infer the correct GCCPREFIX
+ifndef GCCPREFIX
+GCCPREFIX := $(shell sh misc/gccprefix.sh)
+endif
+
+# Directories
+TOP		:= .
+SRCDIR		:= $(TOP)
+#OBJDIR		:= $(TOP)/obj
+OBJDIR		:= ../obj
+USER_GENDIR	:= $(OBJDIR)/gen
+OBJDIRS		:= $(USER_GENDIR)
+
+# Compiler and Linker
+CC		:= $(GCCPREFIX)gcc
+LD		:= $(GCCPREFIX)ld
+CFLAGS		:= -MD -Wall -Werror -Wno-strict-aliasing -Wno-unused-function -pipe -fno-builtin -nostdinc -fno-stack-protector
+LDFLAGS		:= -nostdlib
+
+# other tools
+PERL		:= perl
+OBJDUMP		:= $(GCCPREFIX)objdump
+OBJCOPY		:= $(GCCPREFIX)objcopy
+DD		:= $(GCCPREFIX)dd
+NM		:= $(GCCPREFIX)nm
+CSCOPE		:= cscope
+
+
+
+
+# others
+GCC_LIB32 := $(shell $(CC) $(CFLAGS) -m32 -print-libgcc-file-name)
+GCC_LIBS	:= $(GCC_LIB32)
+
+USER_CFLAGS	+= $(CFLAGS) -m32 -D_USER_ -O2 -Iinclude
+USER_LDFLAGS	:= $(LDFLAGS) -m elf_i386 -Tlinker.x -e _start
+
+# Targets
+.PHONY: user_lib user_procs
+
+all: user_lib user_procs gen
+	@echo "All user targets are done."
+
+# Sub-makefiles
+include config.mk
+include lib/Makefile.inc
+include proc/Makefile.inc
+
+gen: $(USER_GENDIR)/user_procs.inc
+	@echo "All targets of gen are done."
+
+clean:
+	@echo -n "Cleaning user obj... "
+	$(V)rm -rf $(OBJDIR)
+	@echo "done."
+

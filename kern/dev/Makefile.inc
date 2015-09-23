@@ -8,6 +8,8 @@ KERN_SRCFILES	+= $(KERN_DIR)/dev/serial.c
 KERN_SRCFILES	+= $(KERN_DIR)/dev/keyboard.c
 KERN_SRCFILES	+= $(KERN_DIR)/dev/devinit.c
 KERN_SRCFILES	+= $(KERN_DIR)/dev/mboot.c
+KERN_SRCFILES	+= $(KERN_DIR)/dev/intr.c
+KERN_SRCFILES	+= $(KERN_DIR)/dev/idt.S
 
 
 $(KERN_OBJDIR)/dev/%.o: $(KERN_DIR)/dev/%.c

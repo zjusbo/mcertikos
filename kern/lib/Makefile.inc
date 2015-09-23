@@ -10,6 +10,9 @@ KERN_SRCFILES	+= $(KERN_DIR)/lib/seg.c
 KERN_SRCFILES	+= $(KERN_DIR)/lib/types.c
 KERN_SRCFILES	+= $(KERN_DIR)/lib/x86.c
 KERN_SRCFILES	+= $(KERN_DIR)/lib/monitor.c
+KERN_SRCFILES	+= $(KERN_DIR)/lib/pmap.c
+KERN_SRCFILES	+= $(KERN_DIR)/lib/elf.c
+KERN_SRCFILES	+= $(KERN_DIR)/lib/trap.c
 
 $(KERN_OBJDIR)/lib/%.o: $(KERN_DIR)/lib/%.c
 	@echo + cc[KERN/lib] $<

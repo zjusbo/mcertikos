@@ -94,6 +94,8 @@ void pmmap_init(uintptr_t mbi_addr);
 int pmmap_entries_nr(void);
 uint32_t pmmap_get_entry_start(int idx);
 uint32_t pmmap_get_entry_length(int idx);
+void set_cr3(char **);
+void enable_paging(void);
 
 #endif /* _KERN_ */
 
