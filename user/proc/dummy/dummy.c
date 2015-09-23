@@ -18,7 +18,7 @@ main (int argc, char **argv)
   unsigned int addr = 0;
   unsigned int val;
   char c;
-  printf ("Specify a virtual address to read or write to the address.\n");
+  printf ("Specify a virtual address to read from or write to.\n");
   printf("Enter the address: ");
 	while (1)
 	{
@@ -64,7 +64,7 @@ main (int argc, char **argv)
         }
       }
       addr = 0;
-      printf ("\nSpecify a virtual address to read or write to the address.\n");
+      printf ("\nSpecify a virtual address to read from or write to.\n");
       printf("Enter the address: ");
       continue;
     }
