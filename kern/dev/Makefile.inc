@@ -9,6 +9,9 @@ KERN_SRCFILES	+= $(KERN_DIR)/dev/keyboard.c
 KERN_SRCFILES	+= $(KERN_DIR)/dev/devinit.c
 KERN_SRCFILES	+= $(KERN_DIR)/dev/mboot.c
 KERN_SRCFILES	+= $(KERN_DIR)/dev/intr.c
+KERN_SRCFILES	+= $(KERN_DIR)/dev/pic.c
+KERN_SRCFILES	+= $(KERN_DIR)/dev/timer.c
+KERN_SRCFILES	+= $(KERN_DIR)/dev/tsc.c
 KERN_SRCFILES	+= $(KERN_DIR)/dev/idt.S
 
 

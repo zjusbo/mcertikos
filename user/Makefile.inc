@@ -1,16 +1,20 @@
+# -*-Makefile-*-
 
-USER_TOP := user
+USER_DIR	:= user
+USER_OBJDIR	:= $(OBJDIR)/user
 
-USER_CFLAGS	+= $(CFLAGS) -m32 -D_USER_ -O2 -I$(USER_TOP)/include
-USER_LDFLAGS	:= $(LDFLAGS) -m elf_i386 -T$(USER_TOP)/linker.x -e _start
+OBJDIRS		+= $(USER_OBJDIR)
 
-USER_GENDIR := $(OBJDIR)/gen
+include $(USER_DIR)/config.mk
 
-# Sub-makefiles
-include $(USER_TOP)/config.mk
-include $(USER_TOP)/lib/Makefile.inc
-include $(USER_TOP)/proc/Makefile.inc
+USER_CFLAGS	+= $(CFLAGS) -m32 -D_USER_ -Og -g -I$(USER_DIR)/include -I$(KERN_DIR)
+USER_LDFLAGS	:= $(LDFLAGS) -m elf_i386 -Ttext=0x40000000 -e _start
 
-gen: $(USER_GENDIR)/user_procs.inc
-	@echo "All targets of gen are done."
+include $(USER_DIR)/lib/Makefile.inc
+include $(USER_DIR)/idle/Makefile.inc
+include $(USER_DIR)/pingpong/Makefile.inc
 
+user: lib idle pingpong
+	@echo All targets of user are done.
+
+install_user:

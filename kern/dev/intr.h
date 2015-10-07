@@ -61,6 +61,16 @@
 /* (254) Default ? */
 #define T_DEFAULT	254
 
+#ifndef __ASSEMBLER__
+
+void intr_init(void);
+void intr_enable(uint8_t irq);
+void intr_local_enable(void);
+void intr_local_disable(void);
+void intr_eoi(void);
+
+#endif
+
 #endif /* _KERN_ */
 
 #endif /* !_KERN_DEV_INTR_H_ */

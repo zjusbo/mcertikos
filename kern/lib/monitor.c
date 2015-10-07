@@ -6,6 +6,7 @@
 #include <lib/gcc.h>
 #include <lib/string.h>
 #include <lib/x86.h>
+#include <lib/thread.h>
 #include <lib/monitor.h>
 #include <dev/console.h>
 
@@ -24,40 +25,33 @@ static struct Command commands[] =
 	{
 		{ "help", "Display this list of commands", mon_help },
 		{ "kerninfo", "Display information about the kernel", mon_kerninfo },
-		{ "runproc", "Run the dummy user process", mon_start_user }, };
+		{ "startuser", "Start the user idle process", mon_start_user }, };
 #define NCOMMANDS (sizeof(commands)/sizeof(commands[0]))
 
 /***** Implementations of basic kernel monitor commands *****/
 
-unsigned int CID = 0;
-extern uint8_t _binary___obj_proc_dummy_dummy_start[];
-
-typedef void (*entry_t)(void);
+extern uint8_t _binary___obj_user_idle_idle_start[];
+extern unsigned int proc_create(void *, unsigned int);
+extern void tqueue_remove(unsigned int, unsigned int);
+extern void tcb_set_state(unsigned int, unsigned int);
+extern void set_curid(unsigned int);
+extern void kctx_switch(unsigned int, unsigned int);
 
 int
 mon_start_user (int argc, char **argv, struct Trapframe *tf)
 {
-	if (CID != 0)
-	{
-		dprintf(
-			"The process is already running. If you want to run the program again, please restart qemu.\n");
-		return 0;
-	}
-	uint8_t * exe = _binary___obj_proc_dummy_dummy_start;
+    unsigned int idle_pid;
+    idle_pid = proc_create (_binary___obj_user_idle_idle_start, 10000);
+    KERN_DEBUG("process idle %d is created.\n", idle_pid);
 
-	CID = alloc_mem_quota (0, 1024 * 1024);
+    KERN_INFO("Start user-space ... \n");
 
-	elf_load (exe, CID);
+    tqueue_remove (NUM_IDS, idle_pid);
+    tcb_set_state (idle_pid, TSTATE_RUN);
+    set_curid (idle_pid);
+    kctx_switch (0, idle_pid);
 
-	dprintf("Program 0x%08x is loaded.\n", exe);
-
-	set_pdir_base (CID);
-
-	entry_t entry = (entry_t) elf_entry (exe);
-
-	entry();
-
-	return 0;
+    KERN_PANIC("mon_startuser() should never reach here.\n");
 }
 
 int
@@ -82,13 +76,6 @@ mon_kerninfo (int argc, char **argv, struct Trapframe *tf)
 	dprintf("  end    %08x\n", end);
 	dprintf("Kernel executable memory footprint: %dKB\n",
 		ROUNDUP(end - start, 1024) / 1024);
-	return 0;
-}
-
-int
-mon_backtrace (int argc, char **argv, struct Trapframe *tf)
-{
-	// TODO
 	return 0;
 }
 

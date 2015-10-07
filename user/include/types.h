@@ -1,59 +1,34 @@
 #ifndef _USER_TYPES_H_
 #define _USER_TYPES_H_
 
-#include "gcc.h"
+typedef signed char		int8_t;
+typedef unsigned char		uint8_t;
+typedef short			int16_t;
+typedef unsigned short		uint16_t;
+typedef int			int32_t;
+typedef unsigned int		uint32_t;
+typedef long long		int64_t;
+typedef unsigned long long	uint64_t;
 
-typedef signed char		__int8_t;
-typedef unsigned char		__uint8_t;
-typedef short			__int16_t;
-typedef unsigned short		__uint16_t;
-typedef int			__int32_t;
-typedef unsigned int		__uint32_t;
-typedef long long		__int64_t;
-typedef unsigned long long	__uint64_t;
+typedef uint32_t		uintptr_t;
+typedef int32_t			intptr_t;
+typedef uint32_t		size_t;
+typedef int32_t			ssize_t;
 
-typedef __uint64_t		__paddr_t;	/* CertiKOS uses PAE paging */
-typedef __uint32_t		__uintptr_t;
-typedef __int32_t		__intptr_t;
+typedef uint8_t			bool;
+#define TRUE			((bool) 1)
+#define FALSE			((bool) 0)
 
-typedef __uint32_t		__size_t;
-typedef __int32_t		__ssize_t;
+#define NULL			((void *) 0)
 
-typedef __uint32_t		__reg_t;
+typedef int32_t			pid_t;
 
+typedef enum {
+	A16, A32, A64
+} addr_sz_t;
 
-typedef __uint8_t	uint8_t;
-typedef __uint16_t	uint16_t;
-typedef __uint32_t	uint32_t;
-typedef __uint64_t	uint64_t;
-
-typedef __int8_t	int8_t;
-typedef __int16_t	int16_t;
-typedef __int32_t	int32_t;
-typedef __int64_t	int64_t;
-
-typedef __paddr_t	paddr_t;	/* physical address type */
-typedef __intptr_t	intptr_t;	/* signed virtual address type */
-typedef __uintptr_t	uintptr_t;	/* unsigned virtual address type */
-
-typedef __size_t	size_t;
-typedef __ssize_t	ssize_t;
-
-typedef uint8_t		bool;
-#define TRUE		((bool) 1)
-#define FALSE		((bool) 0)
-
-#define NULL		((void *) 0)
-
-typedef int32_t		pid_t;
-typedef int32_t		vmid_t;
-typedef int32_t		vid_t;
-typedef int32_t		chid_t;
-
-typedef enum data_sz_t {
-	SZ8, 	/* 1 byte */
-	SZ16, 	/* 2 byte */
-	SZ32	/* 4 byte */
+typedef enum {
+	SZ8, SZ16, SZ32
 } data_sz_t;
 
 #define MIN(a, b)				\
@@ -88,8 +63,5 @@ typedef enum data_sz_t {
 
 /* Return the offset of 'member' relative to the beginning of a struct type */
 #define offsetof(type, member)	__builtin_offsetof(type, member)
-
-#define ffs32(n)		__builtin_ffs((n))
-#define ffs64(n)		__builtin_ffsll((n))
 
 #endif /* !_USER_TYPES_H_ */

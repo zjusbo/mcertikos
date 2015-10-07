@@ -95,7 +95,7 @@ QEMUOPTS_BIOS	:= -L $(UTILSDIR)/qemu/
 
 # Targets
 
-.PHONY: all boot kern user deps qemu qemu-nox qemu-gdb user_lib user_procs
+.PHONY: all boot kern user deps qemu qemu-nox qemu-gdb
 
 
 all: boot kern user link
@@ -164,8 +164,6 @@ cscope:
 	$(V)rm -rf cscope.*
 	$(V)find . -name "*.[chsS]" > cscope.files
 	$(V)cscope -bkq -i cscope.files
-
-user: user_lib user_procs gen
 
 
 # Sub-makefiles

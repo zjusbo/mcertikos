@@ -229,3 +229,9 @@ memchr(const void *s, int c, size_t n)
 			return (void *) s;
 	return NULL;
 }
+
+void *
+memzero(void *v, size_t n)
+{
+	return memset(v, 0, n);
+}

@@ -13,13 +13,6 @@
 #define VM_USERLO	0x40000000
 #define VM_BOTTOM	0x00000000
 
-extern char cons_getc(void);
-
-static gcc_aligned(PAGESIZE) void * dll[1024] =
-	{ [0] = dprintf,
-	  [1] = cons_getc
-	};
-
 /*
  * Load elf execution file exe to the virtual address space pmap.
  */
@@ -86,8 +79,6 @@ elf_load (void *exe_ptr, int pid)
 		}
 	}
 
-	// set the dynamic linkage page
-	pt_copyout ((void *) dll, pid, VM_DYNLINK, sizeof(dll));
 }
 
 uintptr_t

@@ -4,6 +4,7 @@
 #include <lib/seg.h>
 #include <lib/x86.h>
 
+#include <dev/pic.h>
 #include <dev/intr.h>
 
 volatile static bool intr_inited = FALSE;
@@ -85,6 +86,33 @@ intr_init(void)
 	if (intr_inited == TRUE)
 		return;
 
+  pic_init();
 	intr_init_idt();
 	intr_inited = TRUE;
+}
+
+void
+intr_enable(uint8_t irq)
+{
+	if (irq >= 16)
+		return;
+	pic_enable(irq);
+}
+
+void
+intr_eoi(void)
+{
+	pic_eoi();
+}
+
+void
+intr_local_enable(void)
+{
+	sti();
+}
+
+void
+intr_local_disable(void)
+{
+	cli();
 }

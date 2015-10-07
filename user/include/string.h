@@ -20,5 +20,6 @@ void *memcpy(void *dst, const void *src, size_t len);
 void *memmove(void *dst, const void *src, size_t len);
 int memcmp(const void *s1, const void *s2, size_t len);
 void *memchr(const void *s, int c, size_t n);
+void *memzero(void *v, size_t n);
 
 #endif /* !_USER_STRING_H_ */

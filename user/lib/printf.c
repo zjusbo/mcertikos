@@ -22,29 +22,6 @@ struct printbuf {
 	char buf[MAX_BUF];
 };
 
-//TODO: to debug code to support the correct up/down/left/right opreation in the mgmt shell
-
-void
-gets(char* buf, int size) {
-	int num = 0;
-	char c=0;
-	char echo[2];
-	echo[1]=0;
-	while(num < (size-1)) {
-		c=0;
-		while ((c = getc()) == 0);
-		echo[0] = c;
-		puts(echo, 2);
-		if (c == '\n' || c == '\r') {
-			buf[num] = 0;
-			return;
-		}
-		buf [num++] = c;
-	}
-	buf[size-1]=0;
-	return;
-}
-
 static void
 putch(int ch, struct printbuf *b)
 {
@@ -74,19 +51,6 @@ vcprintf(const char *fmt, va_list ap)
 
 int
 printf(const char *fmt, ...)
-{
-	va_list ap;
-	int cnt;
-
-	va_start(ap, fmt);
-	cnt = vcprintf(fmt, ap);
-	va_end(ap);
-
-	return cnt;
-}
-
-int
-printf2(const char *fmt, ...)
 {
 	va_list ap;
 	int cnt;
