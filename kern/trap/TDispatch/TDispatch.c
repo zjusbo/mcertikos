@@ -31,12 +31,13 @@ void syscall_dispatch(void)
 		 *
 		 * Parameters:
 		 *   a[0]: the identifier of the ELF image
+		 *   a[1]: the quota
 		 *
 		 * Return:
 		 *   the process ID of the process
 		 *
 		 * Error:
-		 *   E_INVAL_ADDR, E_INVAL_PID
+		 *   E_INVAL_PID
 		 */
 		sys_spawn();
 		break;

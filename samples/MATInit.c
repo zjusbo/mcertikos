@@ -39,7 +39,7 @@ pmem_init(unsigned int mbi_addr)
 	while (i < size) {
 		s = get_mms(i);
 		l = get_mml(i);
-		maxs = (s + l + 1) / PAGESIZE;
+		maxs = (s + l) / PAGESIZE + 1;
 		if (maxs > nps)
 			nps = maxs;
 		i++;
