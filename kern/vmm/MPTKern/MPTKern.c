@@ -14,6 +14,10 @@ void pdir_init_kern(unsigned int mbi_adr)
     pdir_init(mbi_adr);
     
     //TODO
+    unsigned int pde_index = 0;
+    for (; pde_index < 1024; pde_index++) {
+        set_pdir_entry_identity(0, pde_index);
+    }
 }
 
 /**
@@ -26,7 +30,18 @@ void pdir_init_kern(unsigned int mbi_adr)
 unsigned int map_page(unsigned int proc_index, unsigned int vadr, unsigned int page_index, unsigned int perm)
 {   
   // TODO
-  return 0;
+  unsigned int pde = get_pdir_entry_by_va(proc_index, vadr);
+  unsigned int ptbl;
+  if ((pde & PTE_P) == 0) {
+    ptbl = alloc_ptbl(proc_index, vadr);
+    if (ptbl == 0) {
+      //no physical page available
+      return MagicNumber;
+    }
+  }
+  set_ptbl_entry_by_va(proc_index, vadr, page_index, perm);
+  pde = get_pdir_entry_by_va(proc_index, vadr);
+  return pde >> 12;
 }
 
 /**
@@ -40,5 +55,11 @@ unsigned int map_page(unsigned int proc_index, unsigned int vadr, unsigned int p
 unsigned int unmap_page(unsigned int proc_index, unsigned int vadr)
 {
   // TODO
-  return 0;
-}   
+  unsigned int pte = get_ptbl_entry_by_va(proc_index, vadr);
+  if ((pte & PTE_P) == 0) {
+    return pte;
+  }
+  rmv_ptbl_entry_by_va(proc_index, vadr);
+  pte = get_ptbl_entry_by_va(proc_index, vadr);
+  return pte;
+}

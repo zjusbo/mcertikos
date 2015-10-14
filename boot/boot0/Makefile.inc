@@ -4,7 +4,7 @@ BOOT0_OBJFILES += $(OBJDIR)/boot/boot0.o
 
 $(OBJDIR)/boot/boot0: $(BOOT0_OBJFILES)
 	@echo + ld[BOOT] $@
-	$(V)$(LD) $(BOOT_LDFLAGS) -N -e start -Ttext 0x7c00 -o $@.elf $^
+	$(V)$(LD) $(BOOT_LDFLAGS) -N -e start -Ttext 0x7C00 -o $@.elf $^
 	$(V)$(OBJDUMP) -S -M i8086 $@.elf > $@.asm
 	$(V)$(OBJCOPY) -S -O binary $@.elf $@
 	$(V)$(NM) -n $@.elf > $@.sym

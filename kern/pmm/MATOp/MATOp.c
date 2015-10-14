@@ -1,6 +1,15 @@
 #include <lib/debug.h>
 #include "import.h"
 
+#define PAGESIZE  4096
+#define VM_USERLO  0x40000000
+#define VM_USERHI  0xF0000000
+#define VM_USERLO_PI  (VM_USERLO / PAGESIZE)
+#define VM_USERHI_PI  (VM_USERHI / PAGESIZE)
+
+//set a next pointer to remember the last allocated page index
+static unsigned int next = VM_USERLO_PI;
+
 /**
  * Allocation of a physical page.
  *
@@ -15,10 +24,32 @@
  * 2. Optimize the code with the memorization techniques so that you do not have to
  *    scan the allocation table from scratch every time.
  */
+
 unsigned int
 palloc()
 {
-  // TODO
+  //no available physical pages
+  if (get_nps() == 0) {
+    return 0;
+  }
+
+  //first record the current value of next
+  unsigned int begin = next;
+  do {
+    //if the page pointed by next has the usable permission and it's not allocated
+    //then allocate the page, and return the page index
+    if (at_is_norm(next) && at_is_allocated(next) == 0) {
+      at_set_allocated(next, 1);
+      return next;
+    }
+    next++;
+    //if next moves to the end, we set next to the beginning
+    if (next == VM_USERHI_PI) {
+      next = VM_USERLO_PI;
+    }
+  } while (next != begin);
+
+  //all pages are allocated
   return 0;
 } 
 
@@ -34,5 +65,5 @@ palloc()
 void
 pfree(unsigned int pfree_index)
 {
-  // TODO
+  at_set_allocated(pfree_index, 0);
 }
