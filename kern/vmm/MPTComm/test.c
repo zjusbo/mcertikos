@@ -24,16 +24,16 @@ int MPTComm_test2()
   container_split(0, 100);
   alloc_ptbl(1, vaddr);
   if (get_pdir_entry_by_va(1, vaddr) == 0) {
-    dprintf("test 2 failed.\n");
+    dprintf("[1]test 2 failed.\n");
     return 1;
   }
   if(get_ptbl_entry_by_va(1, vaddr) != 0) {
-    dprintf("test 2 failed.\n");
+    dprintf("[2]test 2 failed.\n");
     return 1;
   }
   free_ptbl(1, vaddr);
   if (get_pdir_entry_by_va(1, vaddr) != 0) {
-    dprintf("test 2 failed.\n");
+    dprintf("[3]test 2 failed.\n");
     return 1;
   }
   dprintf("test 2 passed.\n");

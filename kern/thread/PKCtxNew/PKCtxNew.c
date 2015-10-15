@@ -1,3 +1,4 @@
+// BO SONG DOUBLE CHECKED
 #include <lib/gcc.h>
 #include <lib/x86.h>
 
@@ -16,5 +17,10 @@ extern char STACK_LOC[NUM_IDS][PAGESIZE] gcc_aligned(PAGESIZE);
 unsigned int kctx_new(void *entry, unsigned int id, unsigned int quota)
 {
   // TODO
-  return 0;
+  unsigned int child = alloc_mem_quota(id, quota);
+  kctx_set_eip(child, entry);
+  kctx_set_esp(child, (void *)&STACK_LOC[child][PAGESIZE-1]);
+  
+  return child;
+
 }

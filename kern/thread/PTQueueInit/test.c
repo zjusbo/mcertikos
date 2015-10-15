@@ -24,34 +24,35 @@ int PTQueueInit_test2()
   tqueue_enqueue(0, 3);
   tqueue_enqueue(0, 4);
   if (tcb_get_prev(2) != NUM_IDS || tcb_get_next(2) != 3) {
-    dprintf("test 2 failed.\n");
+    dprintf("test 2.1 failed.\n");
     return 1;
   }
   if (tcb_get_prev(3) != 2 || tcb_get_next(3) != 4) {
-    dprintf("test 2 failed.\n");
+    dprintf("test 2.2 failed.\n");
     return 1;
   }
   if (tcb_get_prev(4) != 3 || tcb_get_next(4) != NUM_IDS) {
-    dprintf("test 2 failed.\n");
+    dprintf("test 2.3 failed.\n");
     return 1;
   }
   tqueue_remove(0, 3);
   if (tcb_get_prev(2) != NUM_IDS || tcb_get_next(2) != 4) {
-    dprintf("test 2 failed.\n");
+    dprintf("test 2.4 failed.\n");
     return 1;
   }
   if (tcb_get_prev(3) != NUM_IDS || tcb_get_next(3) != NUM_IDS) {
-    dprintf("test 2 failed.\n");
+    dprintf("test 2.5 failed.\n");
     return 1;
   }
   if (tcb_get_prev(4) != 2 || tcb_get_next(4) != NUM_IDS) {
-    dprintf("test 2 failed.\n");
+    dprintf("test 2.6 failed.\n");
     return 1;
   }
   pid = tqueue_dequeue(0);
   if (pid != 2 || tcb_get_prev(pid) != NUM_IDS || tcb_get_next(pid) != NUM_IDS
    || tqueue_get_head(0) != 4 || tqueue_get_tail(0) != 4) {
-    dprintf("test 2 failed.\n");
+    dprintf("test 2.7 failed.\n");
+    dprintf("%u %u %u %u %u\n", pid, tcb_get_prev(pid), tcb_get_next(pid), tqueue_get_head(0), tqueue_get_tail(0));
     return 1;
   }
   dprintf("test 2 passed.\n");

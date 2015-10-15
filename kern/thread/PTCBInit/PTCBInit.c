@@ -1,3 +1,4 @@
+// BO SONG DOUBLE CHECKED
 #include <lib/x86.h>
 
 #include "import.h"
@@ -13,4 +14,8 @@ void tcb_init(unsigned int mbi_addr)
 	paging_init(mbi_addr);
 
   // TODO
+  	int id;
+        for(id = 0; id < NUM_IDS; id++){
+		tcb_init_at_id(id);
+	}
 }

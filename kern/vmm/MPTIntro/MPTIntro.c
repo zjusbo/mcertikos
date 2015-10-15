@@ -80,7 +80,7 @@ unsigned int get_ptbl_entry(unsigned int proc_index, unsigned int pde_index, uns
     // pte_index * 4 means each page table entry is 4 byte.
     unsigned int pte_addr = (unsigned int )PDirPool[proc_index][pde_index];
     pte_addr &= 0xfffff000; //remove perm bits
-    pte_addr += pte_index << 2;//
+    pte_addr += (pte_index << 2);//
     return *(unsigned int *)pte_addr; 
 }
 
@@ -92,8 +92,8 @@ void set_ptbl_entry(unsigned int proc_index, unsigned int pde_index, unsigned in
     // each page table entry is 4 byte, char * is also 4 byte
     unsigned int* pte;
     unsigned int pte_addr =  (unsigned int )PDirPool[proc_index][pde_index];
-    pte_addr &= 0xfffff000;//rmove perm bits
-    pte_addr += pte_index << 2;
+    pte_addr &= 0xfffff000;//remove perm bits
+    pte_addr += (pte_index << 2);
 
     pte = (unsigned int *)pte_addr;
     *pte &= 0x00000000;
@@ -117,7 +117,7 @@ void rmv_ptbl_entry(unsigned int proc_index, unsigned int pde_index, unsigned in
     unsigned int * pte;
     unsigned int pte_addr = (unsigned int)PDirPool[proc_index][pde_index];
     pte_addr &= 0xfffff000;//remove perm bits
-    pte_addr += pte_index << 2;
+    pte_addr += (pte_index << 2);
     pte = (unsigned int *)pte_addr;
     *pte &= 0x00000000;
 }

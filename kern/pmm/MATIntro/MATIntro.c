@@ -1,3 +1,5 @@
+//Author: Bo Song
+//9/25/2015
 #include <lib/gcc.h>
 
 //Number of physical pages that are actually available in the machine.

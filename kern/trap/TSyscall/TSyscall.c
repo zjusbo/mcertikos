@@ -76,6 +76,41 @@ extern uint8_t _binary___obj_user_pingpong_ding_start[];
 void sys_spawn(void)
 {
   // TODO
+  unsigned int curid;
+  unsigned int elf_id, quota;
+  unsigned int pid;
+  void * elf_addr;
+  curid = get_curid();
+  elf_id = syscall_get_arg2(); //arg1 is reserved for system call number 
+  if(elf_id > 3 || elf_id < 1){
+    //not legal
+    syscall_set_errno(E_INVAL_PID);
+    syscall_set_retval1(NUM_IDS);
+    return ;
+  }
+  else if(elf_id == 1){
+    elf_addr = (void *)_binary___obj_user_pingpong_ping_start;
+  }
+  else if(elf_id == 2){
+    elf_addr = (void *)_binary___obj_user_pingpong_pong_start;
+  }
+  else if(elf_id == 3){
+    elf_addr = (void *)_binary___obj_user_pingpong_ding_start;
+  }
+  else{
+     // should not go here
+  }
+
+  //TODO elf_addr
+  
+  quota = syscall_get_arg3(); 
+  pid = proc_create(elf_addr, quota);
+  if(pid == NUM_IDS){
+    syscall_set_errno(E_MEM);
+  }else{
+    syscall_set_errno(E_SUCC);
+  }
+  syscall_set_retval1(pid); 
 }
 
 /**
@@ -87,4 +122,6 @@ void sys_spawn(void)
 void sys_yield(void)
 {
   // TODO
+  thread_yield();
+  syscall_set_errno(E_SUCC);
 }

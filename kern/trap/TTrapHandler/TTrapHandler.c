@@ -78,6 +78,17 @@ void pgflt_handler(void)
 void exception_handler(void)
 {
   // TODO
+  unsigned int trapno;
+  unsigned int cur_pid;
+  cur_pid = get_curid();
+  tf_t tf; 
+  tf = uctx_pool[cur_pid];
+  if(tf.trapno == T_PGFLT){
+    pgflt_handler();
+  }
+  else{
+    default_exception_handler();
+  }
 }
 
 
@@ -106,6 +117,17 @@ static int default_intr_handler (void)
 void interrupt_handler (void)
 {
     // TODO
+    unsigned int arg1;
+    arg1 = syscall_get_arg1();
+    if(arg1 == T_IRQ0 + IRQ_TIMER){
+        timer_intr_handler();
+    }
+    else if(arg1 == T_IRQ0 + IRQ_SPURIOUS){
+        spurious_intr_handler();
+    }
+    else{
+        default_intr_handler();
+    }
 }
 
 void trap (tf_t *tf)
