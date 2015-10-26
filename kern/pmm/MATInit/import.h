@@ -6,6 +6,11 @@
 /**
  * Premitives that are already implemented in this lab.
  */
+
+void mem_spinlock_init(void);
+void mem_lock(void);
+void mem_unlock(void);
+
 void set_nps(unsigned int); // Sets the number of avaiable pages.
 void at_set_perm(unsigned int, unsigned int); // Sets the permission of the physical page with given index.
 

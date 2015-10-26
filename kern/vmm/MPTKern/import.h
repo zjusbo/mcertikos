@@ -1,5 +1,5 @@
-#ifndef _KERN_MM_MPTKERN_H_
-#define _KERN_MM_MPTKERN_H_
+#ifndef _KERN_VMM_MPTKERN_H_
+#define _KERN_VMM_MPTKERN_H_
 
 #ifdef _KERN_
 
@@ -13,4 +13,4 @@ unsigned int get_ptbl_entry_by_va(unsigned int, unsigned int);
 
 #endif /* _KERN_ */
 
-#endif /* !_KERN_MM_MPTKERN_H_ */
+#endif /* !_KERN_VMM_MPTKERN_H_ */

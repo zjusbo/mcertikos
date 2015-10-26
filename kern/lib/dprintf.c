@@ -39,6 +39,7 @@ putch (int ch, struct dprintbuf *b)
 int
 vdprintf (const char *fmt, va_list ap)
 {
+
     struct dprintbuf b;
 
     b.idx = 0;

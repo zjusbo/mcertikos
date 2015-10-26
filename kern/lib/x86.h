@@ -5,6 +5,70 @@
 
 #include <lib/types.h>
 
+
+/* CPUID */
+/* 0x0000_0001 ECX */
+#define CPUID_FEATURE_RDRAND            (1<<21)
+#define CPUID_FEATURE_F16C              (1<<29)
+#define CPUID_FEATURE_AVX               (1<<28)
+#define CPUID_FEATURE_OSXSAVE           (1<<27)
+#define CPUID_FEATURE_XSAVE             (1<<26)
+#define CPUID_FEATURE_AES               (1<<25)
+#define CPUID_FEATURE_TSC_DEADLINE      (1<<24)
+#define CPUID_FEATURE_POPCNT            (1<<23)
+#define CPUID_FEATURE_MOVBE             (1<<22)
+#define CPUID_FEATURE_X2APIC            (1<<21)
+#define CPUID_FEATURE_SSE42             (1<<20)
+#define CPUID_FEATURE_SSE41             (1<<19)
+#define CPUID_FEATURE_DCA               (1<<18)
+#define CPUID_FEATURE_PCID              (1<<17)
+#define CPUID_FEATURE_PDCM              (1<<15)
+#define CPUID_FEATURE_XTPR              (1<<14)
+#define CPUID_FEATURE_CMPXCHG16B        (1<<13)
+#define CPUID_FEATURE_FMA               (1<<12)
+#define CPUID_FEATURE_CNXT_ID           (1<<10)
+#define CPUID_FEATURE_SSSE3             (1<<9)
+#define CPUID_FEATURE_TM2               (1<<8)
+#define CPUID_FEATURE_EIST              (1<<7)
+#define CPUID_FEATURE_SMX               (1<<6)
+#define CPUID_FEATURE_VMX               (1<<5)
+#define CPUID_FEATURE_DS_CPL            (1<<4)
+#define CPUID_FEATURE_MONITOR           (1<<3)
+#define CPUID_FEATURE_DTES64            (1<<2)
+#define CPUID_FEATURE_PCLMULQDQ         (1<<1)
+#define CPUID_FEATURE_SSE3              (1<<0)
+/* 0x0000_0001 EDX */
+#define CPUID_FEATURE_PBE               (1<<31)
+#define CPUID_FEATURE_TM                (1<<29)
+#define CPUID_FEATURE_HTT               (1<<28)
+#define CPUID_FEATURE_SS                (1<<27)
+#define CPUID_FEATURE_SSE2              (1<<26)
+#define CPUID_FEATURE_SSE               (1<<25)
+#define CPUID_FEATURE_FXSR              (1<<24)
+#define CPUID_FEATURE_MMX               (1<<23)
+#define CPUID_FEATURE_ACPI              (1<<22)
+#define CPUID_FEATURE_DS                (1<<21)
+#define CPUID_FEATURE_CLFUSH            (1<<19)
+#define CPUID_FEATURE_PSE36             (1<<17)
+#define CPUID_FEATURE_PAT               (1<<16)
+#define CPUID_FEATURE_CMOV              (1<<15)
+#define CPUID_FEATURE_MCA               (1<<14)
+#define CPUID_FEATURE_PGE               (1<<13)
+#define CPUID_FEATURE_MTRR              (1<<12)
+#define CPUID_FEATURE_SYSENTREXIT       (1<<11)
+#define CPUID_FEATURE_APIC              (1<<9)
+#define CPUID_FEATURE_CMPXCHG8B         (1<<8)
+#define CPUID_FEATURE_MCE               (1<<7)
+#define CPUID_FEATURE_PAE               (1<<6)
+#define CPUID_FEATURE_MSR               (1<<5)
+#define CPUID_FEATURE_TSC               (1<<4)
+#define CPUID_FEATURE_PSE               (1<<3)
+#define CPUID_FEATURE_DE                (1<<2)
+#define CPUID_FEATURE_VME               (1<<1)
+#define CPUID_FEATURE_FPU               (1<<0)
+
+
+
 /* CR0 */
 #define CR0_PE		0x00000001	/* Protection Enable */
 #define CR0_MP		0x00000002	/* Monitor coProcessor */
@@ -43,20 +107,26 @@
 #define PTE_COW   0x800 // Avail for system programmer's use
 
 /* other constants */
+#define NUM_CPUS 8
 #define NUM_IDS 64
 #define MagicNumber 1048577
 #define MAX_CHILDREN 3
 
+uintptr_t get_stack_base(void);
+uintptr_t get_stack_pointer(void);
 uint32_t read_ebp(void);
 void lldt(uint16_t);
 void cli(void);
 void sti(void);
 uint64_t rdmsr(uint32_t);
 void wrmsr(uint32_t, uint64_t);
+void pause(void);
 void halt(void);
+uint32_t xchg(volatile uint32_t *addr, uint32_t newval);
 uint64_t rdtsc(void);
 void enable_sse(void);
 void cpuid(uint32_t, uint32_t*, uint32_t*, uint32_t*, uint32_t*);
+void cpuid_subleaf(uint32_t leaf, uint32_t subleaf, uint32_t *eaxp, uint32_t *ebxp, uint32_t *ecxp, uint32_t *edxp);
 cpu_vendor vender(void);
 uint32_t rcr3(void);
 void outl(int, uint32_t);

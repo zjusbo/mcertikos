@@ -1,5 +1,5 @@
-#ifndef _KERN_MM_MPTOP_H_
-#define _KERN_MM_MPTOP_H_
+#ifndef _KERN_VMM_MPTOP_H_
+#define _KERN_VMM_MPTOP_H_
 
 #ifdef _KERN_
 
@@ -15,4 +15,4 @@ void set_pdir_entry_by_va(unsigned int, unsigned int, unsigned int);
 
 #endif /* _KERN_ */
 
-#endif /* !_KERN_MM_MPTOP_H_ */
+#endif /* !_KERN_VMM_MPTOP_H_ */

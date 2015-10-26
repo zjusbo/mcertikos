@@ -1,6 +1,7 @@
 #include <lib/string.h>
 #include <lib/types.h>
 #include <lib/debug.h>
+#include <lib/spinlock.h>
 
 #include "video.h"
 #include "console.h"
@@ -35,12 +36,14 @@ cons_intr(int (*proc)(void))
 		if (cons.wpos == CONSOLE_BUFFER_SIZE)
 			cons.wpos = 0;
 	}
+
 }
 
 char
 cons_getc(void)
 {
   int c;
+
 
   // poll for any pending input characters,
   // so that this function works even when interrupts are disabled
@@ -55,6 +58,7 @@ cons_getc(void)
       cons.rpos = 0;
     return c;
   }
+
   return 0;
 }
 

@@ -4,12 +4,12 @@
 #include <lib/debug.h>
 #include <lib/x86.h>
 #include <dev/intr.h>
+#include <pcpu/PCPUIntro/export.h>
 
 #include <vmm/MPTOp/export.h>
+#include <thread/PThread/export.h>
 
 #include "import.h"
-
-extern tf_t uctx_pool[NUM_IDS];
 
 static void trap_dump(tf_t *tf)
 {
@@ -38,28 +38,28 @@ static void trap_dump(tf_t *tf)
 	KERN_DEBUG("\t%08x:\tss:    \t\t%08x\n", &tf->ss, tf->ss);
 }
 
-void default_exception_handler(void)
+void default_exception_handler(tf_t *tf)
 {
 	unsigned int cur_pid;
 
 	cur_pid = get_curid();
-	trap_dump(&uctx_pool[cur_pid]);
+	trap_dump(tf);
 
-	KERN_PANIC("Trap %d @ 0x%08x.\n", uctx_pool[cur_pid].trapno, uctx_pool[cur_pid].eip);
+	KERN_PANIC("Trap %d @ 0x%08x.\n", tf -> trapno, tf -> eip);
 }
 
-void pgflt_handler(void)
+void pgflt_handler(tf_t *tf)
 {
 	unsigned int cur_pid;
 	unsigned int errno;
 	unsigned int fault_va;
 
 	cur_pid = get_curid();
-	errno = uctx_pool[cur_pid].err;
+	errno = tf -> err;
 	fault_va = rcr2();
 
   //Uncomment this line if you need to see the information of the sequence of page faults occured.
-	//KERN_DEBUG("Page fault: VA 0x%08x, errno 0x%08x, process %d, EIP 0x%08x.\n", fault_va, errno, cur_pid, uctx_pool[cur_pid].eip);
+	//KERN_DEBUG("Page fault: VA 0x%08x, errno 0x%08x, process %d, EIP 0x%08x.\n", fault_va, errno, cur_pid, tf -> eip);
 
 	if (errno & PFE_PR) {
 		KERN_PANIC("Permission denied: va = 0x%08x, errno = 0x%08x.\n", fault_va, errno);
@@ -75,9 +75,18 @@ void pgflt_handler(void)
  * We currently only handle the page fault exception.
  * All other exceptions should be routed to the default exception handler.
  */
-void exception_handler(void)
+void exception_handler(tf_t *tf)
 {
-  // TODO
+	unsigned int cur_pid;
+	unsigned int trapno;
+
+	cur_pid = get_curid();
+	trapno = tf -> trapno;
+
+	if (trapno == T_PGFLT)
+		pgflt_handler(tf);
+	else
+		default_exception_handler(tf);
 }
 
 
@@ -103,25 +112,48 @@ static int default_intr_handler (void)
  * Any interrupt request except the spurious or timer should be
  * routed to the default interrupt handler.
  */
-void interrupt_handler (void)
+void interrupt_handler (tf_t *tf)
 {
-    // TODO
+    unsigned int cur_pid;
+    unsigned int trapno;
+
+    cur_pid = get_curid ();
+
+    trapno = tf -> trapno;
+
+    switch (trapno)
+    {
+      case T_IRQ0 + IRQ_SPURIOUS:
+          spurious_intr_handler ();
+          break;
+      case T_IRQ0 + IRQ_TIMER:
+          timer_intr_handler ();
+          break;
+      default:
+          default_intr_handler ();
+    }
 }
 
 void trap (tf_t *tf)
 {
     unsigned int cur_pid;
+    unsigned int in_kernel;
 
     cur_pid = get_curid ();
-    uctx_pool[cur_pid] = *tf; //save the current user context (trap frame).
     set_pdir_base (0); //switch to the kernel's page table.
 
-    if (T_DIVIDE <= tf->trapno && tf->trapno <= T_SECEV)
-        exception_handler ();
-    else if (T_IRQ0 + IRQ_TIMER <= tf->trapno && tf->trapno <= T_IRQ0 + IRQ_IDE2)
-        interrupt_handler ();
-    else if (tf->trapno == T_SYSCALL)
-        syscall_dispatch ();
+    trap_cb_t f;
 
-    proc_start_user (); //trap handled. jump back to the user. This is where you switch the TSS and page structure back.
+    f = TRAP_HANDLER[get_pcpu_idx()][tf->trapno];
+
+    if (f){
+            f(tf);
+    } else {
+            KERN_WARN("No handler for user trap 0x%x, process %d, eip 0x%08x. \n",
+                            tf->trapno, cur_pid, tf->eip);
+    }
+
+    kstack_switch(cur_pid);
+    set_pdir_base(cur_pid);
+	  trap_return((void *) tf);
 }

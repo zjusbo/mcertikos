@@ -11,8 +11,8 @@
  * Adapted for PIOS by Bryan Ford at Yale University.
  */
 
-#ifndef _SYS_PREINIT_DEV_SERIAL_H_
-#define _SYS_PREINIT_DEV_SERIAL_H_
+#ifndef _KERN_DEV_SERIAL_H_
+#define _KERN_DEV_SERIAL_H_
 
 #ifdef _KERN_
 
@@ -23,4 +23,4 @@ void serial_intr(void); // irq 4
 
 #endif /* _KERN_ */
 
-#endif /* !_SYS_PREINIT_DEV_SERIAL_H_ */
+#endif /* !_KERN_DEV_SERIAL_H_ */

@@ -104,3 +104,18 @@ memzero(void *v, size_t n)
 {
 	return memset(v, 0, n);
 }
+
+memcmp(const void *v1, const void *v2, size_t n)
+{
+        const uint8_t *s1 = (const uint8_t *) v1;
+        const uint8_t *s2 = (const uint8_t *) v2;
+
+        while (n-- > 0) {
+                if (*s1 != *s2)
+                        return (int) *s1 - (int) *s2;
+                s1++, s2++;
+        }
+
+        return 0;
+}
+

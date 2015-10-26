@@ -1,5 +1,5 @@
-#ifndef _KERN_DEBUG_H_
-#define _KERN_DEBUG_H_
+#ifndef _KERN_LIB_DEBUG_H_
+#define _KERN_LIB_DEBUG_H_
 
 #ifdef _KERN_
 
@@ -56,6 +56,14 @@ void debug_normal(const char *, int, const char *, ...);
 void debug_warn(const char*, int, const char*, ...);
 void debug_panic(const char*, int, const char*, ...);
 
+
+void debug_init(void);
+void debug_lock(void);
+void debug_unlock(void);
+void serial_lock(void);
+void serial_unlock(void);
+void assert_serial_locked(void);
+
 #else
 
 #define dprintf(...) do {			\
@@ -65,4 +73,4 @@ void debug_panic(const char*, int, const char*, ...);
 
 #endif /* _KERN_ */
 
-#endif /* !_KERN_DEBUG_H_ */
+#endif /* !_KERN_LIB_DEBUG_H_ */

@@ -1,4 +1,5 @@
 #include <lib/x86.h>
+#include <pcpu/PCPUIntro/export.h>
 
 /**
  * The structure for thread queues.
@@ -24,31 +25,31 @@ struct TQueue {
  * Any threads that are ready to be sheduled are pushed to the ready queue,
  * and are scheduled in a round-robin manner.
  */
-struct TQueue TQueuePool[NUM_IDS + 1];
+struct TQueue TQueuePool[NUM_CPUS][NUM_IDS + 1];
 
 unsigned int tqueue_get_head(unsigned int chid)
 {
-	return TQueuePool[chid].head;
+	return TQueuePool[get_pcpu_idx()][chid].head;
 }
 
 void tqueue_set_head(unsigned int chid, unsigned int head)
 {
-	TQueuePool[chid].head = head;
+	TQueuePool[get_pcpu_idx()][chid].head = head;
 }
 
 unsigned int tqueue_get_tail(unsigned int chid)
 {
-	return TQueuePool[chid].tail;
+	return TQueuePool[get_pcpu_idx()][chid].tail;
 }
 
 void tqueue_set_tail(unsigned int chid, unsigned int tail)
 {
-	TQueuePool[chid].tail = tail;
+	TQueuePool[get_pcpu_idx()][chid].tail = tail;
 }
 
-void tqueue_init_at_id(unsigned int chid)
+void tqueue_init_at_id(unsigned int cpu_idx, unsigned int chid)
 {
-	TQueuePool[chid].head = NUM_IDS;
-	TQueuePool[chid].tail = NUM_IDS;
+	TQueuePool[cpu_idx][chid].head = NUM_IDS;
+	TQueuePool[cpu_idx][chid].tail = NUM_IDS;
 }
 

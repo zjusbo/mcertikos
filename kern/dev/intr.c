@@ -6,7 +6,11 @@
 
 #include <dev/pic.h>
 #include <dev/intr.h>
+#include <dev/lapic.h>
+#include <dev/ioapic.h>
 
+
+volatile static bool using_apic = FALSE;
 volatile static bool intr_inited = FALSE;
 
 /* Entries of interrupt handlers, defined in trapasm.S by TRAPHANDLE* */
@@ -83,26 +87,63 @@ intr_init_idt(void)
 void
 intr_init(void)
 {
-	if (intr_inited == TRUE)
-		return;
-
   pic_init();
+
+  uint32_t dummy, edx;
+  cpuid(0x00000001, &dummy, &dummy, &dummy, &edx);
+  using_apic = (edx & CPUID_FEATURE_APIC) ? TRUE : FALSE;
+  KERN_ASSERT(using_apic == TRUE);
+
+	if (using_apic == TRUE){
+		if(pcpu_onboot()){
+			ioapic_init();
+		}
+		lapic_init();
+	}
+
 	intr_init_idt();
 	intr_inited = TRUE;
 }
 
 void
-intr_enable(uint8_t irq)
+intr_enable(uint8_t irq, int cpunum)
 {
-	if (irq >= 16)
-		return;
-	pic_enable(irq);
+    KERN_ASSERT(cpunum == 0xff || (0 <= cpunum && cpunum < pcpu_ncpu()));
+
+    if (irq >= 24)
+        return;
+
+    if (using_apic == TRUE) {
+        ioapic_enable(irq, (cpunum == 0xff) ?
+                          0xff : pcpu_cpu_lapicid(cpunum), 0, 0);
+    } else {
+        KERN_ASSERT(irq < 16);
+        pic_enable(irq);
+    }
+}
+
+void
+intr_enable_lapicid(uint8_t irq, int lapic_id)
+{
+    if (irq > 24)
+        return;
+
+    if (using_apic == TRUE) {
+        ioapic_enable(irq, (lapic_id == 0xff) ?
+                          0xff : lapic_id, 0, 0);
+    } else {
+        KERN_ASSERT(irq < 16);
+        pic_enable(irq);
+    }
 }
 
 void
 intr_eoi(void)
 {
-	pic_eoi();
+  if (using_apic == TRUE)
+    lapic_eoi();
+  else
+	  pic_eoi();
 }
 
 void

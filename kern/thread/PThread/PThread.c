@@ -1,5 +1,9 @@
 #include <lib/x86.h>
 #include <lib/thread.h>
+#include <lib/spinlock.h>
+#include <lib/debug.h>
+#include <dev/lapic.h>
+#include <pcpu/PCPUIntro/export.h>
 
 #include "import.h"
 
@@ -17,8 +21,13 @@ void thread_init(unsigned int mbi_addr)
  */
 unsigned int thread_spawn(void *entry, unsigned int id, unsigned int quota)
 {
-  // TODO
-  return 0;
+	unsigned int pid;
+
+	pid = kctx_new(entry, id, quota);
+	tcb_set_state(pid, TSTATE_READY);
+	tqueue_enqueue(NUM_IDS, pid);
+
+	return pid;
 }
 
 /**
@@ -32,5 +41,18 @@ unsigned int thread_spawn(void *entry, unsigned int id, unsigned int quota)
  */
 void thread_yield(void)
 {
-  // TODO
+	unsigned int old_cur_pid;
+	unsigned int new_cur_pid;
+
+	old_cur_pid = get_curid();
+	tcb_set_state(old_cur_pid, TSTATE_READY);
+	tqueue_enqueue(NUM_IDS, old_cur_pid);
+
+	new_cur_pid = tqueue_dequeue(NUM_IDS);
+	tcb_set_state(new_cur_pid, TSTATE_RUN);
+	set_curid(new_cur_pid);
+
+	if (old_cur_pid != new_cur_pid){
+		kctx_switch(old_cur_pid, new_cur_pid);
+	}
 }

@@ -1,5 +1,5 @@
-#ifndef _SYS_PREINIT_DEV_TIMER_H_
-#define _SYS_PREINIT_DEV_TIMER_H_
+#ifndef _KERN_DEV_TIMER_H_
+#define _KERN_DEV_TIMER_H_
 
 #ifdef _KERN_
 
@@ -18,4 +18,4 @@ void timer_hw_init(void);
 
 #endif /* _KERN_ */
 
-#endif /* !_SYS_PREINIT_DEV_TIMER_H_ */
+#endif /* !_KERN_DEV_TIMER_H_ */

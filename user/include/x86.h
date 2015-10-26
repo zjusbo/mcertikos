@@ -298,7 +298,6 @@ rdtscp(void)
 {
 	uint64_t rv;
 
-	/* TODO: decide to use which one through checking cpuid */
 #if 0
 	/* rdtscp maybe not provided by VirtualBox */
 	__asm __volatile("rdtscp" : "=A" (rv));

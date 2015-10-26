@@ -1,4 +1,7 @@
 #include <lib/gcc.h>
+#include <lib/spinlock.h>
+
+static spinlock_t mem_lk;
 
 //Number of physical pages that are actually available in the machine.
 static unsigned int NUM_PAGES;
@@ -29,6 +32,23 @@ struct ATStruct {
  */
 static struct ATStruct AT[1 << 20];
 
+
+
+void 
+mem_spinlock_init(void){
+	spinlock_init(&mem_lk);
+}
+
+void
+mem_lock(void){
+	spinlock_acquire(&mem_lk);
+}
+
+void
+mem_unlock(void){
+	spinlock_release(&mem_lk);
+}
+
 //The getter function for NUM_PAGES.
 unsigned int gcc_inline
 get_nps(void)
@@ -51,8 +71,20 @@ set_nps(unsigned int nps)
 unsigned int
 at_is_norm(unsigned int page_index)
 {
-  //TODO
-  return 0;
+	unsigned int tperm;
+
+	tperm = AT[page_index].perm;
+
+	if (tperm == 0) {
+		tperm = 0;
+	} else {
+		if (tperm == 1)
+			tperm = 0;
+		else
+			tperm = 1;
+	}
+
+	return tperm;
 }
 
 /**
@@ -63,7 +95,8 @@ at_is_norm(unsigned int page_index)
 void
 at_set_perm(unsigned int page_index, unsigned int norm_val)
 {
-  //TODO
+	AT[page_index].perm = norm_val;
+	AT[page_index].allocated = 0;
 }
 
 /**
@@ -73,8 +106,15 @@ at_set_perm(unsigned int page_index, unsigned int norm_val)
 unsigned int
 at_is_allocated(unsigned int page_index)
 {
-  //TODO
-  return 0;
+	unsigned int allocated;
+
+	allocated = AT[page_index].allocated;
+	if (allocated == 0)
+		allocated = 0;
+	else
+		allocated = 1;
+
+	return allocated;
 }
 
 /**
@@ -84,5 +124,5 @@ at_is_allocated(unsigned int page_index)
 void
 at_set_allocated(unsigned int page_index, unsigned int allocated)
 {
-  //TODO
+	AT[page_index].allocated = allocated;
 }

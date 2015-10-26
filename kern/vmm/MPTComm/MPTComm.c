@@ -9,11 +9,23 @@
  */
 void pdir_init(unsigned int mbi_adr)
 {
-    // TODO: define your local variables here.
-
+    unsigned int i, j;
     idptbl_init(mbi_adr);
 
-    // TODO
+    i = 0;
+    while(i < NUM_IDS)
+    {
+        j = 0;
+        while(j < 1024)    
+        {
+            if (j < 256 || j >= 960)    
+              set_pdir_entry_identity(i, j);
+            else
+              rmv_pdir_entry(i, j);
+            j++;
+        }
+        i++;
+    }
 }
 
 /**
@@ -25,8 +37,22 @@ void pdir_init(unsigned int mbi_adr)
  */
 unsigned int alloc_ptbl(unsigned int proc_index, unsigned int vadr)
 {
-  // TODO
-  return 0;
+  unsigned int i;
+  unsigned int pi;
+  unsigned int pde_index;
+  pi = container_alloc(proc_index);
+  if (pi != 0)
+  {
+    set_pdir_entry_by_va(proc_index, vadr, pi);
+    pde_index = vadr / (4096 * 1024);
+    i = 0;
+    while (i < 1024)        
+    {
+      rmv_ptbl_entry(proc_index, pde_index, i);
+      i ++;
+    }     
+  }       
+  return pi;
 }
 
 // Reverse operation of alloc_ptbl.
@@ -34,5 +60,8 @@ unsigned int alloc_ptbl(unsigned int proc_index, unsigned int vadr)
 // and frees the page for the page table entries (with container_free).
 void free_ptbl(unsigned int proc_index, unsigned int vadr)
 {
-  // TODO
+  unsigned int pde;
+  pde = get_pdir_entry_by_va(proc_index, vadr);
+  rmv_pdir_entry_by_va(proc_index, vadr);
+  container_free(proc_index, pde / PAGESIZE);
 }

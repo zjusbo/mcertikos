@@ -8,8 +8,8 @@
  * Adapted for PIOS by Bryan Ford at Yale University.
  */
 
-#ifndef _SYS_PREINIT_DEV_PIC_H_
-#define _SYS_PREINIT_DEV_PIC_H_
+#ifndef _KERN_DEV_PIC_H_
+#define _KERN_DEV_PIC_H_
 
 #ifdef _KERN_
 
@@ -27,4 +27,4 @@ void pic_reset(void);
 
 #endif /* _KERN_ */
 
-#endif /* !_SYS_PREINIT_DEV_PIC_H */
+#endif /* !_KERN_DEV_PIC_H */

@@ -3,10 +3,12 @@
 
 #ifdef _KERN_
 
-unsigned int syscall_get_arg1(void);
-void sys_puts(void);
-void sys_spawn(void);
-void sys_yield(void);
+unsigned int syscall_get_arg1(tf_t *tf);
+void sys_puts(tf_t *tf);
+void sys_spawn(tf_t *tf);
+void sys_yield(tf_t *tf);
+void sys_produce(tf_t *tf);
+void sys_consume(tf_t *tf);
 
 #endif /* _KERN_ */
 

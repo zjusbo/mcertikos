@@ -15,7 +15,7 @@ CLIGHTGEN_FLAGS   += -D_KERN_ -I$(KERN_DIR) -I$(KERN_DIR)/kern -I.
 endif
 
 ifdef DEBUG_MSG
-KERN_CFLAGS	+= -Og -g
+KERN_CFLAGS	+= -O2 -g
 else
 KERN_CFLAGS	+= -O2
 endif
@@ -27,6 +27,7 @@ GCC_LIBS        := $(GCC_LIB32)
 include		$(KERN_DIR)/config.mk
 include		$(KERN_DIR)/dev/Makefile.inc
 include		$(KERN_DIR)/lib/Makefile.inc
+include		$(KERN_DIR)/pcpu/Makefile.inc
 include		$(KERN_DIR)/init/Makefile.inc
 include		$(KERN_DIR)/pmm/Makefile.inc
 include		$(KERN_DIR)/vmm/Makefile.inc
@@ -54,7 +55,7 @@ kern: $(KERN_OBJFILES) $(KERN_BINFILES)
 link: $(KERN_OBJDIR)/kernel
 
 # Link kernel
-$(KERN_OBJDIR)/kernel: $(KERN_OBJFILES) $(KERN_BINFILES) 
+$(KERN_OBJDIR)/kernel: kern
 	@echo + ld[KERN] $@
 	$(V)$(LD) -o $@ $(KERN_LDFLAGS) $(KERN_OBJFILES) $(GCC_LIBS) -b binary $(KERN_BINFILES)
 	$(V)$(OBJDUMP) -S $@ > $@.asm
@@ -70,4 +71,3 @@ install_kern: $(KERN_OBJDIR)/kernel $(CERTIKOS_IMG)
 kern_coq: $(KERN_CCOMP_SRC)
 	@echo + clightgen $(KERN_CCOMP_SRC)
 	$(V)$(CLIGHTGEN) $(CLIGHTGEN_FLAGS) $(KERN_CCOMP_SRC)
-

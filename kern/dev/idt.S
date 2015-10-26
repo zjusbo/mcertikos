@@ -82,7 +82,7 @@ TRAPHANDLER     (Xdefault,	T_DEFAULT)
 .type	_alltraps,@function
 .p2align 4, 0x90		/* 16-byte alignment, nop filled */
 _alltraps:
-	cli			# make sure there is no nested trap
+  cli			# make sure there is no nested trap
 
 	cld
 

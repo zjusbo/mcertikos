@@ -184,7 +184,9 @@ vprintfmt(putch_t putch, void *putdat, const char *fmt, va_list ap)
 
 			// (unsigned) octal
 		case 'o':
-      // TODO
+			num = getuint(&ap, lflag);
+			base = 8;
+			goto number;
 
 			// pointer
 		case 'p':

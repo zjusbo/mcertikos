@@ -36,6 +36,9 @@ enum __syscall_nr {
 
 	SYS_yield,	/* yield to another process */
 
+  SYS_produce,
+  SYS_consume,
+
 	MAX_SYSCALL_NR	/* XXX: always put it at the end of __syscall_nr */
 };
 
@@ -63,6 +66,9 @@ enum __error_nr {
 	E_HVM_IOPORT,
 	E_HVM_MSR,
 	E_HVM_INTRWIN,
+  E_EXCEEDS_QUOTA,
+  E_MAX_NUM_CHILDEN_REACHED,
+  E_INVAL_CHILD_ID,
 	MAX_ERROR_NR	/* XXX: always put it at the end of __error_nr */
 };
 

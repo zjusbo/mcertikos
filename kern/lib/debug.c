@@ -4,15 +4,23 @@
 #include <lib/x86.h>
 
 #include <lib/types.h>
+#include <lib/spinlock.h>
+
+void
+debug_init(void)
+{
+}
 
 void
 debug_info(const char *fmt, ...)
 {
 #ifdef DEBUG_MSG
+
 	va_list ap;
 	va_start(ap, fmt);
 	vdprintf(fmt, ap);
 	va_end(ap);
+
 #endif
 }
 

@@ -1,9 +1,9 @@
 #include <lib/gcc.h>
 #include <lib/x86.h>
+#include <lib/kstack.h>
 
 #include "import.h"
 
-extern char STACK_LOC[NUM_IDS][PAGESIZE] gcc_aligned(PAGESIZE);
 
 /**
  * Allocates memory for the new child thread, then sets the eip, and esp
@@ -15,6 +15,10 @@ extern char STACK_LOC[NUM_IDS][PAGESIZE] gcc_aligned(PAGESIZE);
  */
 unsigned int kctx_new(void *entry, unsigned int id, unsigned int quota)
 {
-  // TODO
-  return 0;
+	unsigned int pid;
+	pid = alloc_mem_quota(id, quota);
+	kctx_set_esp(pid, proc_kstack[pid].kstack_hi);
+	kctx_set_eip(pid, entry);
+
+	return pid;
 }

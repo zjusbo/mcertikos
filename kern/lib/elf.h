@@ -1,5 +1,5 @@
-#ifndef _KERN_ELF_H_
-#define _KERN_ELF_H_
+#ifndef _KERN_LIB_ELF_H_
+#define _KERN_LIB_ELF_H_
 
 #ifdef _KERN_
 
@@ -75,4 +75,4 @@ uintptr_t elf_entry(void *);
 
 #endif /* _KERN_ */
 
-#endif /* !_KERN_ELF_H_ */
+#endif /* !_KERN_LIB_ELF_H_ */

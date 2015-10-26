@@ -4,16 +4,16 @@
 #include <lib/seg.h>
 #include <lib/trap.h>
 #include <lib/x86.h>
+#include <pcpu/PCPUIntro/export.h>
 
 #include "import.h"
 
 extern tf_t uctx_pool[NUM_IDS];
-extern char STACK_LOC[NUM_IDS][PAGESIZE];
 
 void proc_start_user(void)
 {
 	unsigned int cur_pid = get_curid();
-	tss_switch(cur_pid);
+	kstack_switch(cur_pid);
 	set_pdir_base(cur_pid);
 
 	trap_return((void *) &uctx_pool[cur_pid]);
@@ -35,6 +35,8 @@ unsigned int proc_create(void *elf_addr, unsigned int quota)
   uctx_pool[pid].esp = VM_USERHI;
   uctx_pool[pid].eflags = FL_IF;
   uctx_pool[pid].eip = elf_entry(elf_addr);
+
+	seg_init_proc(get_pcpu_idx(), pid);
 
 	return pid;
 }

@@ -1,4 +1,5 @@
 #include <lib/x86.h>
+#include <lib/debug.h>
 
 #include "import.h"
 
@@ -15,8 +16,20 @@
  */
 unsigned int alloc_page (unsigned int proc_index, unsigned int vaddr, unsigned int perm)
 {
-	// TODO
-	return 0;
+	unsigned int pi;
+	unsigned int result;
+
+	pt_spinlock_acquire();
+	pi = container_alloc (proc_index);
+
+	if (pi == 0)
+		result = MagicNumber;
+	else
+		result = map_page (proc_index, vaddr, pi, perm);
+
+
+	pt_spinlock_release();
+	return result;
 }
 
 
@@ -26,7 +39,7 @@ unsigned int alloc_page (unsigned int proc_index, unsigned int vaddr, unsigned i
 unsigned int alloc_mem_quota (unsigned int id, unsigned int quota)
 {
 	unsigned int child;
-	child = container_split (id, quota);
+  child = container_split (id, quota);
 	return child;
 }
 

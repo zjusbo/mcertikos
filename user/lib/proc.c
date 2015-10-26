@@ -13,3 +13,16 @@ yield(void)
 {
 	sys_yield();
 }
+
+void
+produce(void)
+{
+	sys_produce();
+}
+
+void
+consume(void)
+{
+	sys_consume();
+}
+

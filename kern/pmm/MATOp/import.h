@@ -8,6 +8,9 @@
  */
 
 // The number of avaiable physical pages.
+void mem_lock(void);
+void mem_unlock(void);
+
 unsigned int get_nps(void);
 
 // Whether the page with the given index has the normal permission.

@@ -1,8 +1,13 @@
-#ifndef _NEW_MM_MPTNEW_H_
-#define _NEW_MM_MPTNEW_H_
+#ifndef _KERN_VMM_MPTNEW_H_
+#define _KERN_VMM_MPTNEW_H_
+
+#ifdef _KERN_
 
 unsigned int alloc_page(unsigned int, unsigned int, unsigned int);
 unsigned int alloc_mem_quota(unsigned int, unsigned int);
 
-#endif
+
+#endif /* _KERN_ */
+
+#endif /* !_KERN_VMM_MPTNEW_H_ */
 

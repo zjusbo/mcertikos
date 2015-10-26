@@ -5,5 +5,7 @@
 
 pid_t spawn(uintptr_t exe, unsigned int quota);
 void  yield(void);
+void  produce(void);
+void  consume(void);
 
 #endif /* !_USER_PROC_H_ */

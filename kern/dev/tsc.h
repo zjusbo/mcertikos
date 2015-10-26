@@ -1,5 +1,5 @@
-#ifndef _SYS_PREINIT_DEV_TSC_H_
-#define _SYS_PREINIT_DEV_TSC_H_
+#ifndef _KERN_DEV_TSC_H_
+#define _KERN_DEV_TSC_H_
 
 #ifdef _KERN_
 
@@ -13,4 +13,4 @@ void udelay(uint32_t);
 
 #endif /* _KERN_ */
 
-#endif /* !_SYS_PREINIT_DEV_TSC_H_ */
+#endif /* !_KERN_DEV_TSC_H_ */

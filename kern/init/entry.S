@@ -18,7 +18,7 @@
 	/* this is the entry of the kernel */
 	.globl	start
 start:
-	cli
+  cli
 
 	/* check whether the bootloader provide multiboot information */
 	cmpl    $MULTIBOOT_BOOTLOADER_MAGIC, %eax

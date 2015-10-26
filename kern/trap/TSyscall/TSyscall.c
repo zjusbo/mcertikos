@@ -3,6 +3,8 @@
 #include <lib/x86.h>
 #include <lib/trap.h>
 #include <lib/syscall.h>
+#include <dev/intr.h>
+#include <pcpu/PCPUIntro/export.h>
 
 #include "import.h"
 
@@ -12,18 +14,18 @@ static char sys_buf[NUM_IDS][PAGESIZE];
  * Copies a string from user into buffer and prints it to the screen.
  * This is called by the user level "printf" library as a system call.
  */
-void sys_puts(void)
+void sys_puts(tf_t *tf)
 {
 	unsigned int cur_pid;
 	unsigned int str_uva, str_len;
 	unsigned int remain, cur_pos, nbytes;
 
 	cur_pid = get_curid();
-	str_uva = syscall_get_arg2();
-	str_len = syscall_get_arg3();
+	str_uva = syscall_get_arg2(tf);
+	str_len = syscall_get_arg3(tf);
 
 	if (!(VM_USERLO <= str_uva && str_uva + str_len <= VM_USERHI)) {
-		syscall_set_errno(E_INVAL_ADDR);
+		syscall_set_errno(tf, E_INVAL_ADDR);
 		return;
 	}
 
@@ -38,18 +40,18 @@ void sys_puts(void)
 
 		if (pt_copyin(cur_pid,
 			      cur_pos, sys_buf[cur_pid], nbytes) != nbytes) {
-			syscall_set_errno(E_MEM);
+			syscall_set_errno(tf, E_MEM);
 			return;
 		}
 
 		sys_buf[cur_pid][nbytes] = '\0';
-		KERN_INFO("%s", sys_buf[cur_pid]);
+		KERN_INFO("From cpu %d: %s", get_pcpu_idx(), sys_buf[cur_pid]);
 
 		remain -= nbytes;
 		cur_pos += nbytes;
 	}
 
-	syscall_set_errno(E_SUCC);
+	syscall_set_errno(tf, E_SUCC);
 }
 
 extern uint8_t _binary___obj_user_pingpong_ping_start[];
@@ -73,9 +75,38 @@ extern uint8_t _binary___obj_user_pingpong_ding_start[];
  * when the proc_create fails.
  * Otherwise, you mark it as successful, and return the new child process id.
  */
-void sys_spawn(void)
+void sys_spawn(tf_t *tf)
 {
-  // TODO
+  //TODO: improve the implementation by adding the missing argument checks to
+  //make sure the calll to sys_spawn never goes wrong.
+	unsigned int new_pid;
+	unsigned int elf_id, quota;
+	void *elf_addr;
+
+	elf_id = syscall_get_arg2(tf);
+	quota = syscall_get_arg3(tf);
+
+	if (elf_id == 1) {
+		elf_addr = _binary___obj_user_pingpong_ping_start;
+	} else if (elf_id == 2) {
+		elf_addr = _binary___obj_user_pingpong_pong_start;
+	} else if (elf_id == 3) {
+    elf_addr = _binary___obj_user_pingpong_ding_start;
+	} else {
+		syscall_set_errno(tf, E_INVAL_PID);
+		syscall_set_retval1(tf, NUM_IDS);
+		return;
+	}
+
+	new_pid = proc_create(elf_addr, quota);
+
+	if (new_pid == NUM_IDS) {
+		syscall_set_errno(tf, E_INVAL_PID);
+		syscall_set_retval1(tf, NUM_IDS);
+	} else {
+		syscall_set_errno(tf, E_SUCC);
+		syscall_set_retval1(tf, new_pid);
+	}
 }
 
 /**
@@ -84,7 +115,26 @@ void sys_spawn(void)
  * does not take any argument and does not have any return values.
  * Do not forget to set the error number as E_SUCC.
  */
-void sys_yield(void)
+void sys_yield(tf_t *tf)
 {
-  // TODO
+	thread_yield();
+	syscall_set_errno(tf, E_SUCC);
+}
+
+void sys_produce(tf_t *tf)
+{
+  unsigned int i;
+  for(i = 0; i < 5; i++) {
+    KERN_DEBUG("CPU %d: Process %d: Produced %d\n", get_pcpu_idx(), get_curid(), i);
+  }
+	syscall_set_errno(tf, E_SUCC);
+}
+
+void sys_consume(tf_t *tf)
+{
+  unsigned int i;
+  for(i = 0; i < 5; i++) {
+    KERN_DEBUG("CPU %d: Process %d: Consumed %d\n", get_pcpu_idx(), get_curid(), i);
+  }
+	syscall_set_errno(tf, E_SUCC);
 }

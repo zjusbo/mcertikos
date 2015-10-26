@@ -1,5 +1,5 @@
-#ifndef _KERN_LIB_MBOOT_H_
-#define _KERN_LIB_MBOOT_H_
+#ifndef _KERN_DEV_MBOOT_H_
+#define _KERN_DEV_MBOOT_H_
 
 #ifdef _KERN_
 
@@ -99,4 +99,4 @@ void enable_paging(void);
 
 #endif /* _KERN_ */
 
-#endif /* !_KERN_LIB_MBOOT_H_ */
+#endif /* !_KERN_DEV_MBOOT_H_ */

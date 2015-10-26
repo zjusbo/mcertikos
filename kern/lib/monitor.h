@@ -1,5 +1,7 @@
-#ifndef MCERTIKOS_KERN_MONITOR_H
-#define MCERTIKOS_KERN_MONITOR_H
+#ifndef _KERN_LIB_MONITOR_H
+#define _KERN_LIB_MONITOR_H
+
+#ifdef _KERN_
 
 struct Trapframe;
 
@@ -14,4 +16,6 @@ int mon_help(int argc, char **argv, struct Trapframe *tf);
 int mon_kerninfo(int argc, char **argv, struct Trapframe *tf);
 int mon_backtrace(int argc, char **argv, struct Trapframe *tf);
 
-#endif	// !MCERTIKOS_KERN_MONITOR_H
+#endif /* _KERN_ */
+
+#endif	// !_KERN_LIB_MONITOR_H

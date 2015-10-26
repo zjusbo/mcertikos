@@ -1,6 +1,8 @@
 #ifndef _KERN_LIB_TRAP_H_
 #define _KERN_LIB_TRAP_H_
 
+#ifdef _KERN_
+
 #define PFE_PR		0x1	/* Page fault caused by protection violation */
 #define CPU_GDT_UCODE	0x18	    /* user text */
 #define CPU_GDT_UDATA	0x20	    /* user data */
@@ -10,7 +12,9 @@
 
 #ifndef __ASSEMBLER__
 
+#include <lib/x86.h>
 #include <lib/types.h>
+#include <lib/gcc.h>
 
 typedef
 struct pushregs {
@@ -44,6 +48,14 @@ struct tf_t {
 } tf_t;
 
 void trap_return(tf_t *);
+
+typedef void (*trap_cb_t) (tf_t *);
+
+trap_cb_t TRAP_HANDLER[NUM_CPUS][256];
+
+void trap_init(unsigned int cpu_idx);
+
+#endif
 
 #endif
 

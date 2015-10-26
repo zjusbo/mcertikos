@@ -1,5 +1,5 @@
-#ifndef _SYS_PREINIT_LIB_SEG_H_
-#define _SYS_PREINIT_LIB_SEG_H_
+#ifndef _KERN_LIB_SEG_H_
+#define _KERN_LIB_SEG_H_
 
 #ifdef _KERN_
 
@@ -176,11 +176,12 @@ struct gatedesc {
 	(gate).gd_off_31_16 = (uint32_t) (off) >> 16;		\
 }
 
-void seg_init(void);
-void tss_switch(uint32_t pid);
+void seg_init(int cpu_idx);
+void seg_init_proc(int cpu_idx, int pid);
+void kstack_switch(uint32_t pid);
 
 #endif /* !__ASSEMBLER__ */
 
 #endif /* _KERN_ */
 
-#endif /* !_SYS_PREINIT_LIB_SEG_H_ */
+#endif /* !_KERN_LIB_SEG_H_ */

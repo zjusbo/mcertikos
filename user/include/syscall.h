@@ -48,4 +48,22 @@ sys_yield(void)
 		     : "cc", "memory");
 }
 
+static gcc_inline void
+sys_produce(void)
+{
+	asm volatile("int %0" :
+		     : "i" (T_SYSCALL),
+		       "a" (SYS_produce)
+		     : "cc", "memory");
+}
+
+static gcc_inline void
+sys_consume(void)
+{
+	asm volatile("int %0" :
+		     : "i" (T_SYSCALL),
+		       "a" (SYS_consume)
+		     : "cc", "memory");
+}
+
 #endif

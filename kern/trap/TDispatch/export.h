@@ -1,7 +1,13 @@
 #ifndef _KERN_TRAP_TDISPATCH_H_
 #define _KERN_TRAP_TDISPATCH_H_
 
-void syscall_dispatch(void);
+#ifdef _KERN_
 
-#endif
+#include <lib/trap.h>
+
+void syscall_dispatch(tf_t);
+
+#endif /* _KERN_ */
+
+#endif /* !_KERN_TRAP_TDISPATCH_H_ */
 
