@@ -61,10 +61,14 @@ void syscall_dispatch(tf_t *tf)
 		sys_yield(tf);
 		break;
   case SYS_produce:
+    intr_local_enable();
     sys_produce(tf);
+    intr_local_disable();
     break;
   case SYS_consume:
+    intr_local_enable();
     sys_consume(tf);
+    intr_local_disable();
     break;
 	default:
 		syscall_set_errno(E_INVAL_CALLNR);

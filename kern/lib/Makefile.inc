@@ -14,6 +14,11 @@ KERN_SRCFILES	+= $(KERN_DIR)/lib/pmap.c
 KERN_SRCFILES	+= $(KERN_DIR)/lib/elf.c
 KERN_SRCFILES	+= $(KERN_DIR)/lib/kstack.c
 KERN_SRCFILES	+= $(KERN_DIR)/lib/spinlock.c
+KERN_SRCFILES	+= $(KERN_DIR)/lib/lock.c
+KERN_SRCFILES	+= $(KERN_DIR)/lib/TQueue.c
+KERN_SRCFILES	+= $(KERN_DIR)/lib/scheduler.c
+KERN_SRCFILES	+= $(KERN_DIR)/lib/cv.c
+KERN_SRCFILES	+= $(KERN_DIR)/lib/bbf.c
 
 $(KERN_OBJDIR)/lib/%.o: $(KERN_DIR)/lib/%.c
 	@echo + cc[KERN/lib] $<

@@ -53,3 +53,23 @@ void tqueue_init_at_id(unsigned int cpu_idx, unsigned int chid)
 	TQueuePool[cpu_idx][chid].tail = NUM_IDS;
 }
 
+unsigned int tqueue_get_head_pcpu_idx(unsigned int chid, unsigned int pcpu_idx)
+{
+	return TQueuePool[pcpu_idx][chid].head;
+}
+
+void tqueue_set_head_pcpu_idx(unsigned int chid, unsigned int head, unsigned int pcpu_idx)
+{
+	TQueuePool[pcpu_idx][chid].head = head;
+}
+
+unsigned int tqueue_get_tail_pcpu_idx(unsigned int chid, unsigned int pcpu_idx)
+{
+	return TQueuePool[pcpu_idx][chid].tail;
+}
+
+void tqueue_set_tail_pcpu_idx(unsigned int chid, unsigned int tail, unsigned int pcpu_idx)
+{
+	TQueuePool[pcpu_idx][chid].tail = tail;
+}
+

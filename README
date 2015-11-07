@@ -1,5 +1,25 @@
-List here the following info:
-1. who you have worked with; 
-2. whether you coded this assignment together, and if not, who worked on which part;
-3. brief description of what you have implemented;
-4. and anything else you would like us to know.
+Haoliang Zhang and Bo Song
+
+In exercise 2, we registered appropriate trap handler for each trap number.Assign them to exception handler, interrupt handler and system call handler.
+
+In exercise 4, we use cons_lock to protect cons.buf, we use linebuf_lock to protect linebuf.
+
+In exercise 5, we allocated tqueue_lock for each CPU to protect the thread queue. 
+
+In exercise 6, we modified the function timer_intr_handler to call sched_update. In sched_update declared in PThread.c. We make context switch in each SCHED_SLICE milliseconds. Lock is used to protect the shared time counter for each CPU.
+
+In exercise 7, we add intr_local_enable and intr_local_disable to enable interrupts with in the function sys_produce and sys_consume. (They are temporally commented when we were debugging the code in part 4)
+
+In exercise 8, we turn off the interrupt right before we call printing function, and turn interrupts back afterwards.
+
+In exercise 9, we record the previous active thread ID by modifying set_curid() function. We do not switch kstack when it is not necessary to do so.
+
+In exercise 10, we add parameter checking to the function sys_spawn. It can handle E_EXCEEDS_QUOTA, E_MAX_NUM_CHILDEN_REACHED and E_INVAL_CHILD_ID and return proper error number now.
+
+In exercise 11, we implement lock(lib/lock.c) using spinlock, conditional variable(lib/cv.c), scheduler and bounded buffer(lib/bbf.c) based on the textbook with some modifications. The lock has a waiting queue, it puts any processes waiting for the lock onto the queue. The conditional variable have method wait() and signal(), the scheduler has method scheduler_suspend, scheduler_suspend_lock, and scheduler_makeReady. The bounded buffer has a maximum size of 10. In part 4, we've experienced with a lot of deadlock problems. We've conluded the following:
+1)every scheduler must have a spinlock to control access
+2)every tcb queue must be protected by a spinlock. thus we have NUM_CPUS tqueue_lock
+3)to avoid no available ready process to run, we use user/pingpong/ding.c as an idle process(it has an endless while loop inside), this will ensure that there will always be ready process for the scheduler to switch to.
+4)We should be very careful when using spinlock. For example, if the interrupt is enabled during produce() and consume() system call, the timer interrupt may happen anytime during the system call. In yield() function, we should use spinlock_try_acquire() rather than spinlock_acquire(), because if the spinlock is acquired before the timer interrupt, the latter will lead to deadlock.
+5)Keep a simple design is very important. This will make the debugging process more easy.
+6)It's very helpful if we keep enough debug information. This help us figure out where the problem is much easily.

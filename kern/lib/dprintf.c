@@ -13,6 +13,7 @@ struct dprintbuf
     char buf[CONSOLE_BUFFER_SIZE];
 };
 
+// print a string to console
 static void
 cputs (const char *str)
 {
@@ -36,6 +37,7 @@ putch (int ch, struct dprintbuf *b)
     b->cnt++;
 }
 
+// print format string to console, return the number of printed characters
 int
 vdprintf (const char *fmt, va_list ap)
 {

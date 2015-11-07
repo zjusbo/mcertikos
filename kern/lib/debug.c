@@ -5,36 +5,44 @@
 
 #include <lib/types.h>
 #include <lib/spinlock.h>
+spinlock_t dprintf_lock;
 
 void
 debug_init(void)
 {
+        spinlock_init(&dprintf_lock);
 }
 
 void
 debug_info(const char *fmt, ...)
 {
 #ifdef DEBUG_MSG
+        spinlock_acquire(&dprintf_lock);
 
 	va_list ap;
 	va_start(ap, fmt);
 	vdprintf(fmt, ap);
 	va_end(ap);
+        spinlock_release(&dprintf_lock);
 
 #endif
 }
 
 #ifdef DEBUG_MSG
 
+
 void
 debug_normal(const char *file, int line, const char *fmt, ...)
 {
+        spinlock_acquire(&dprintf_lock);
 	dprintf("[D] %s:%d: ", file, line);
 
 	va_list ap;
 	va_start(ap, fmt);
 	vdprintf(fmt, ap);
 	va_end(ap);
+        spinlock_release(&dprintf_lock);
+        
 }
 
 #define DEBUG_TRACEFRAMES	10
@@ -59,6 +67,7 @@ debug_panic(const char *file, int line, const char *fmt,...)
 	int i;
 	uintptr_t eips[DEBUG_TRACEFRAMES];
 	va_list ap;
+        spinlock_acquire(&dprintf_lock);
 
 	dprintf("[P] %s:%d: ", file, line);
 
@@ -71,6 +80,7 @@ debug_panic(const char *file, int line, const char *fmt,...)
 		dprintf("\tfrom 0x%08x\n", eips[i]);
 
 	dprintf("Kernel Panic !!!\n");
+        spinlock_release(&dprintf_lock);
 
 	//intr_local_disable();
 	halt();
@@ -79,12 +89,14 @@ debug_panic(const char *file, int line, const char *fmt,...)
 void
 debug_warn(const char *file, int line, const char *fmt,...)
 {
+        spinlock_acquire(&dprintf_lock);
 	dprintf("[W] %s:%d: ", file, line);
 
 	va_list ap;
 	va_start(ap, fmt);
 	vdprintf(fmt, ap);
 	va_end(ap);
+        spinlock_release(&dprintf_lock);
 }
 
 #endif /* DEBUG_MSG */

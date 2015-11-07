@@ -6,6 +6,8 @@
 #include <lib/kstack.h>
 #include <lib/trap.h>
 #include <vmm/MPTInit/export.h>
+#include <lib/bbf.h>
+#include <lib/scheduler.h>
 
 #include "console.h"
 #include "mboot.h"
@@ -38,6 +40,12 @@ devinit (uintptr_t mbi_addr)
 	KERN_INFO("[BSP KERN] INTR initialized\n");
 	
 	trap_init(0);
+
+        bbf_init();
+        KERN_DEBUG("[BSP KERN] Bounded buffer initialized\n");
+
+        scheduler_init();
+        KERN_DEBUG("[BSP KERN] schedulers for each cpu initialized\n");
 
 	pmmap_init (mbi_addr);
 

@@ -14,11 +14,15 @@ static char linebuf[BUFLEN];
 struct {
 	char buf[CONSOLE_BUFFER_SIZE];
 	uint32_t rpos, wpos;
-} cons;
+} cons; // shared object, need lock to protect it
+
+// lock for cons buffer
+spinlock_t cons_lock;
 
 void
 cons_init()
 {
+        spinlock_init(&cons_lock);
 	memset(&cons, 0x0, sizeof(cons));
 	serial_init();
 	video_init();
@@ -28,7 +32,7 @@ void
 cons_intr(int (*proc)(void))
 {
 	int c;
-
+        spinlock_acquire(&cons_lock);
 	while ((c = (*proc)()) != -1) {
 		if (c == 0)
 			continue;
@@ -36,15 +40,16 @@ cons_intr(int (*proc)(void))
 		if (cons.wpos == CONSOLE_BUFFER_SIZE)
 			cons.wpos = 0;
 	}
+        spinlock_release(&cons_lock);
 
 }
-
+// read a character from console buffer
 char
 cons_getc(void)
 {
   int c;
 
-
+  spinlock_acquire(&cons_lock);
   // poll for any pending input characters,
   // so that this function works even when interrupts are disabled
   // (e.g., when called from the kernel monitor).
@@ -56,9 +61,10 @@ cons_getc(void)
     c = cons.buf[cons.rpos++];
     if (cons.rpos == CONSOLE_BUFFER_SIZE)
       cons.rpos = 0;
+    spinlock_release(&cons_lock);
     return c;
   }
-
+  spinlock_release(&cons_lock);
   return 0;
 }
 
@@ -68,7 +74,7 @@ cons_putc(char c)
 	serial_putc(c);
   video_putc(c);
 }
-
+// blocking read a char from console
 char
 getchar(void)
 {
@@ -79,12 +85,13 @@ getchar(void)
   return c;
 }
 
+// put a char to console
 void
 putchar(char c)
 {
   cons_putc(c);
 }
-
+// prompt is the output message 
 char *
 readline(const char *prompt)
 {
@@ -100,12 +107,16 @@ readline(const char *prompt)
     if (c < 0) {
       dprintf("read error: %e\n", c);
       return NULL;
+    // backspace
     } else if ((c == '\b' || c == '\x7f') && i > 0) {
       putchar('\b');
       i--;
+    // valid ascii char
     } else if (c >= ' ' && i < BUFLEN-1) {
       putchar(c);
       linebuf[i++] = c;
+    // newline character, end of this line
+    // return linebuff
     } else if (c == '\n' || c == '\r') {
       putchar('\n');
       linebuf[i] = 0;

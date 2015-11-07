@@ -4,6 +4,7 @@
 #ifdef _KERN_
 
 unsigned int get_curid(void);
+unsigned int get_previd(void);
 void set_curid(unsigned int curid);
 
 #endif /* _KIERN_ */

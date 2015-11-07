@@ -3,6 +3,10 @@
 #include <syscall.h>
 #include <x86.h>
 
+void loopping() {
+  while (1) {}
+}
+
 int main (int argc, char **argv)
 {
     printf("ping started.\n");
@@ -17,6 +21,7 @@ int main (int argc, char **argv)
       if (i % 4 == 0)
         produce();
     }
+    printf("ping finished\n");
 
     return 0;
 }

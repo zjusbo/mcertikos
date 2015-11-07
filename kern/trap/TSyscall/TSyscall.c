@@ -5,6 +5,7 @@
 #include <lib/syscall.h>
 #include <dev/intr.h>
 #include <pcpu/PCPUIntro/export.h>
+#include <lib/bbf.h>
 
 #include "import.h"
 
@@ -82,10 +83,30 @@ void sys_spawn(tf_t *tf)
 	unsigned int new_pid;
 	unsigned int elf_id, quota;
 	void *elf_addr;
-
+        unsigned int pid;
 	elf_id = syscall_get_arg2(tf);
 	quota = syscall_get_arg3(tf);
+        pid = get_curid();
 
+        if(!container_can_consume(pid, quota)){
+                // exceeds quota
+                syscall_set_errno(tf, E_EXCEEDS_QUOTA);
+                syscall_set_retval1(tf, NUM_IDS);
+                return ;
+        }
+        if(container_get_nchildren(pid) == MAX_CHILDREN){
+                // max children reached
+                syscall_set_errno(tf, E_MAX_NUM_CHILDEN_REACHED);
+                syscall_set_retval1(tf, NUM_IDS);
+        }
+        
+        new_pid = pid * MAX_CHILDREN + 1 + container_get_nchildren(pid);
+        if(new_pid > NUM_IDS){
+                // invalid child id
+                syscall_set_errno(tf, E_INVAL_CHILD_ID);
+                syscall_set_retval1(tf, NUM_IDS);
+                return ;
+        } 
 	if (elf_id == 1) {
 		elf_addr = _binary___obj_user_pingpong_ping_start;
 	} else if (elf_id == 2) {
@@ -125,16 +146,22 @@ void sys_produce(tf_t *tf)
 {
   unsigned int i;
   for(i = 0; i < 5; i++) {
+    bbf_put((int)i);
+    intr_local_disable();
     KERN_DEBUG("CPU %d: Process %d: Produced %d\n", get_pcpu_idx(), get_curid(), i);
+    intr_local_enable();
   }
-	syscall_set_errno(tf, E_SUCC);
+  syscall_set_errno(tf, E_SUCC);
 }
 
 void sys_consume(tf_t *tf)
 {
   unsigned int i;
   for(i = 0; i < 5; i++) {
-    KERN_DEBUG("CPU %d: Process %d: Consumed %d\n", get_pcpu_idx(), get_curid(), i);
+    int item = bbf_get();
+    intr_local_disable();
+    KERN_DEBUG("CPU %d: Process %d: Consumed %d\n", get_pcpu_idx(), get_curid(), item);
+    intr_local_enable();
   }
-	syscall_set_errno(tf, E_SUCC);
+  syscall_set_errno(tf, E_SUCC);
 }

@@ -111,3 +111,23 @@ void tqueue_remove(unsigned int chid, unsigned int pid)
   tcb_set_prev(pid, NUM_IDS);
   tcb_set_next(pid, NUM_IDS);
 }
+
+
+void tqueue_enqueue_pcpu_idx(unsigned int chid, unsigned int pid, unsigned int pcpu_idx)
+{
+	unsigned int tail;
+
+	tail = tqueue_get_tail_pcpu_idx(chid, pcpu_idx);
+
+	if (tail == NUM_IDS) {
+		tcb_set_prev(pid, NUM_IDS);
+		tcb_set_next(pid, NUM_IDS);
+		tqueue_set_head_pcpu_idx(chid, pid, pcpu_idx);
+		tqueue_set_tail_pcpu_idx(chid, pid, pcpu_idx);
+	} else {
+		tcb_set_next(tail, pid);
+		tcb_set_prev(pid, tail);
+		tcb_set_next(pid, NUM_IDS);
+		tqueue_set_tail_pcpu_idx(chid, pid, pcpu_idx);
+	}
+}

@@ -62,7 +62,7 @@ void pgflt_handler(tf_t *tf)
 	//KERN_DEBUG("Page fault: VA 0x%08x, errno 0x%08x, process %d, EIP 0x%08x.\n", fault_va, errno, cur_pid, tf -> eip);
 
 	if (errno & PFE_PR) {
-		KERN_PANIC("Permission denied: va = 0x%08x, errno = 0x%08x.\n", fault_va, errno);
+		KERN_PANIC("CPU %d, PROCESS %d, Permission denied: va = 0x%08x, errno = 0x%08x.\n", get_pcpu_idx(), get_curid(), fault_va, errno);
 		return;
 	}
 
@@ -99,6 +99,7 @@ static int spurious_intr_handler (void)
 static int timer_intr_handler (void)
 {
     intr_eoi ();
+    sched_update();
     return 0;
 }
 
@@ -140,8 +141,9 @@ void trap (tf_t *tf)
     unsigned int in_kernel;
 
     cur_pid = get_curid ();
-    set_pdir_base (0); //switch to the kernel's page table.
-
+    if(cur_pid != 0){
+        set_pdir_base (0); //switch to the kernel's page table.
+    }
     trap_cb_t f;
 
     f = TRAP_HANDLER[get_pcpu_idx()][tf->trapno];
@@ -153,7 +155,10 @@ void trap (tf_t *tf)
                             tf->trapno, cur_pid, tf->eip);
     }
 
-    kstack_switch(cur_pid);
-    set_pdir_base(cur_pid);
-	  trap_return((void *) tf);
+    //if(cur_pid != get_previd()){
+        kstack_switch(cur_pid);
+        set_pdir_base(cur_pid);
+     //}
+    
+    trap_return((void *) tf);
 }
