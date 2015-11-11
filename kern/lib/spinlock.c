@@ -124,19 +124,19 @@ spinlock_try_acquire_(spinlock_t *lk, const char *file, int line)
 void gcc_inline
 spinlock_acquire(spinlock_t *lk)
 {
-	spinlock_acquire_A(lk);
+  spinlock_acquire_A(lk);
 }
 
 void gcc_inline
 spinlock_release(spinlock_t *lk)
 {
-	spinlock_release_A(lk);
+  spinlock_release_A(lk);
 }
 
 int gcc_inline
 spinlock_try_acquire(spinlock_t *lk)
 {
-	return spinlock_try_acquire_A(lk);
+  return spinlock_try_acquire_A(lk);
 }
 
 #endif

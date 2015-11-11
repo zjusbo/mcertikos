@@ -16,47 +16,48 @@ static char sys_buf[NUM_IDS][PAGESIZE];
  */
 void sys_puts(tf_t *tf)
 {
-	unsigned int cur_pid;
-	unsigned int str_uva, str_len;
-	unsigned int remain, cur_pos, nbytes;
+  unsigned int cur_pid;
+  unsigned int str_uva, str_len;
+  unsigned int remain, cur_pos, nbytes;
 
-	cur_pid = get_curid();
-	str_uva = syscall_get_arg2(tf);
-	str_len = syscall_get_arg3(tf);
+  cur_pid = get_curid();
+  str_uva = syscall_get_arg2(tf);
+  str_len = syscall_get_arg3(tf);
 
-	if (!(VM_USERLO <= str_uva && str_uva + str_len <= VM_USERHI)) {
-		syscall_set_errno(tf, E_INVAL_ADDR);
-		return;
-	}
+  if (!(VM_USERLO <= str_uva && str_uva + str_len <= VM_USERHI)) {
+    syscall_set_errno(tf, E_INVAL_ADDR);
+    return;
+  }
 
-	remain = str_len;
-	cur_pos = str_uva;
+  remain = str_len;
+  cur_pos = str_uva;
 
-	while (remain) {
-		if (remain < PAGESIZE - 1)
-			nbytes = remain;
-		else
-			nbytes = PAGESIZE - 1;
+  while (remain) {
+    if (remain < PAGESIZE - 1)
+      nbytes = remain;
+    else
+      nbytes = PAGESIZE - 1;
 
-		if (pt_copyin(cur_pid,
-			      cur_pos, sys_buf[cur_pid], nbytes) != nbytes) {
-			syscall_set_errno(tf, E_MEM);
-			return;
-		}
+    if (pt_copyin(cur_pid,
+		  cur_pos, sys_buf[cur_pid], nbytes) != nbytes) {
+      syscall_set_errno(tf, E_MEM);
+      return;
+    }
 
-		sys_buf[cur_pid][nbytes] = '\0';
-		KERN_INFO("From cpu %d: %s", get_pcpu_idx(), sys_buf[cur_pid]);
+    sys_buf[cur_pid][nbytes] = '\0';
+    KERN_INFO("%s", sys_buf[cur_pid]);
 
-		remain -= nbytes;
-		cur_pos += nbytes;
-	}
+    remain -= nbytes;
+    cur_pos += nbytes;
+  }
 
-	syscall_set_errno(tf, E_SUCC);
+  syscall_set_errno(tf, E_SUCC);
 }
 
 extern uint8_t _binary___obj_user_pingpong_ping_start[];
 extern uint8_t _binary___obj_user_pingpong_pong_start[];
 extern uint8_t _binary___obj_user_pingpong_ding_start[];
+extern uint8_t _binary___obj_user_fstest_fstest_start[];
 
 /**
  * Spawns a new child process.
@@ -77,36 +78,56 @@ extern uint8_t _binary___obj_user_pingpong_ding_start[];
  */
 void sys_spawn(tf_t *tf)
 {
-  //TODO: improve the implementation by adding the missing argument checks to
-  //make sure the calll to sys_spawn never goes wrong.
-	unsigned int new_pid;
-	unsigned int elf_id, quota;
-	void *elf_addr;
+  unsigned int new_pid;
+  unsigned int elf_id, quota;
+  void *elf_addr;
+  unsigned int qok, nc, curid;
 
-	elf_id = syscall_get_arg2(tf);
-	quota = syscall_get_arg3(tf);
+  elf_id = syscall_get_arg2(tf);
+  quota = syscall_get_arg3(tf);
 
-	if (elf_id == 1) {
-		elf_addr = _binary___obj_user_pingpong_ping_start;
-	} else if (elf_id == 2) {
-		elf_addr = _binary___obj_user_pingpong_pong_start;
-	} else if (elf_id == 3) {
+  qok = container_can_consume(curid, quota);
+  nc = container_get_nchildren(curid);
+  curid = get_curid();
+  if (qok == 0) {
+    syscall_set_errno(tf, E_EXCEEDS_QUOTA);
+    syscall_set_retval1(tf, NUM_IDS);
+    return;
+  }
+  else if (NUM_IDS < curid * MAX_CHILDREN + 1 + MAX_CHILDREN) {
+    syscall_set_errno(tf, E_MAX_NUM_CHILDEN_REACHED);
+    syscall_set_retval1(tf, NUM_IDS);
+    return;
+  }
+  else if (nc == MAX_CHILDREN) {
+    syscall_set_errno(tf, E_INVAL_CHILD_ID);
+    syscall_set_retval1(tf, NUM_IDS);
+    return;
+  }
+
+  if (elf_id == 1) {
+    elf_addr = _binary___obj_user_pingpong_ping_start;
+  } else if (elf_id == 2) {
+    elf_addr = _binary___obj_user_pingpong_pong_start;
+  } else if (elf_id == 3) {
     elf_addr = _binary___obj_user_pingpong_ding_start;
-	} else {
-		syscall_set_errno(tf, E_INVAL_PID);
-		syscall_set_retval1(tf, NUM_IDS);
-		return;
-	}
+  } else if (elf_id == 4) {
+    elf_addr = _binary___obj_user_fstest_fstest_start;
+  } else {
+    syscall_set_errno(tf, E_INVAL_PID);
+    syscall_set_retval1(tf, NUM_IDS);
+    return;
+  }
 
-	new_pid = proc_create(elf_addr, quota);
+  new_pid = proc_create(elf_addr, quota);
 
-	if (new_pid == NUM_IDS) {
-		syscall_set_errno(tf, E_INVAL_PID);
-		syscall_set_retval1(tf, NUM_IDS);
-	} else {
-		syscall_set_errno(tf, E_SUCC);
-		syscall_set_retval1(tf, new_pid);
-	}
+  if (new_pid == NUM_IDS) {
+    syscall_set_errno(tf, E_INVAL_PID);
+    syscall_set_retval1(tf, NUM_IDS);
+  } else {
+    syscall_set_errno(tf, E_SUCC);
+    syscall_set_retval1(tf, new_pid);
+  }
 }
 
 /**
@@ -117,24 +138,28 @@ void sys_spawn(tf_t *tf)
  */
 void sys_yield(tf_t *tf)
 {
-	thread_yield();
-	syscall_set_errno(tf, E_SUCC);
+  thread_yield();
+  syscall_set_errno(tf, E_SUCC);
 }
 
 void sys_produce(tf_t *tf)
 {
   unsigned int i;
   for(i = 0; i < 5; i++) {
+    intr_local_disable();
     KERN_DEBUG("CPU %d: Process %d: Produced %d\n", get_pcpu_idx(), get_curid(), i);
+    intr_local_enable();
   }
-	syscall_set_errno(tf, E_SUCC);
+  syscall_set_errno(tf, E_SUCC);
 }
 
 void sys_consume(tf_t *tf)
 {
   unsigned int i;
   for(i = 0; i < 5; i++) {
+    intr_local_disable();
     KERN_DEBUG("CPU %d: Process %d: Consumed %d\n", get_pcpu_idx(), get_curid(), i);
+    intr_local_enable();
   }
-	syscall_set_errno(tf, E_SUCC);
+  syscall_set_errno(tf, E_SUCC);
 }

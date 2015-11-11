@@ -11,6 +11,8 @@
 
 #include "import.h"
 
+void ide_intr(void);
+
 static void trap_dump(tf_t *tf)
 {
 	if (tf == NULL)
@@ -62,6 +64,7 @@ void pgflt_handler(tf_t *tf)
 	//KERN_DEBUG("Page fault: VA 0x%08x, errno 0x%08x, process %d, EIP 0x%08x.\n", fault_va, errno, cur_pid, tf -> eip);
 
 	if (errno & PFE_PR) {
+		trap_dump(tf);
 		KERN_PANIC("Permission denied: va = 0x%08x, errno = 0x%08x.\n", fault_va, errno);
 		return;
 	}
@@ -99,6 +102,7 @@ static int spurious_intr_handler (void)
 static int timer_intr_handler (void)
 {
     intr_eoi ();
+    sched_update();
     return 0;
 }
 
@@ -129,6 +133,7 @@ void interrupt_handler (tf_t *tf)
       case T_IRQ0 + IRQ_TIMER:
           timer_intr_handler ();
           break;
+      // TODO: handle the disk interrupts here
       default:
           default_intr_handler ();
     }

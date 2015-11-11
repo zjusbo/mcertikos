@@ -12,21 +12,22 @@ extern tf_t uctx_pool[NUM_IDS];
 
 void proc_start_user(void)
 {
-	unsigned int cur_pid = get_curid();
-	kstack_switch(cur_pid);
-	set_pdir_base(cur_pid);
+  unsigned int cur_pid = get_curid();
+  static int first = TRUE;
+  kstack_switch(cur_pid);
+  set_pdir_base(cur_pid);
 
-	trap_return((void *) &uctx_pool[cur_pid]);
+  trap_return((void *) &uctx_pool[cur_pid]);
 }
 
 unsigned int proc_create(void *elf_addr, unsigned int quota)
 {
-	unsigned int pid, id;
+  unsigned int pid, id;
 
   id = get_curid();
-	pid = thread_spawn((void *) proc_start_user, id, quota);
+  pid = thread_spawn((void *) proc_start_user, id, quota);
 
-	elf_load(elf_addr, pid);
+  elf_load(elf_addr, pid);
 
   uctx_pool[pid].es = CPU_GDT_UDATA | 3;
   uctx_pool[pid].ds = CPU_GDT_UDATA | 3;
@@ -36,7 +37,7 @@ unsigned int proc_create(void *elf_addr, unsigned int quota)
   uctx_pool[pid].eflags = FL_IF;
   uctx_pool[pid].eip = elf_entry(elf_addr);
 
-	seg_init_proc(get_pcpu_idx(), pid);
-
-	return pid;
+  seg_init_proc(get_pcpu_idx(), pid);
+  
+  return pid;
 }

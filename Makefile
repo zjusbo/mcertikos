@@ -89,13 +89,13 @@ GDBPORT	:= $(shell expr `id -u` % 5000 + 25000)
  
 # qemu
 QEMU		:= qemu-system-x86_64
-QEMUOPTS	:= -smp 4 -hda $(CERTIKOS_IMG) -serial mon:stdio -gdb tcp::$(GDBPORT) -m 2048 -k en-us
+QEMUOPTS	:= -smp 4 -hda $(CERTIKOS_IMG) -serial mon:stdio -gdb tcp::$(GDBPORT) -m 2048 -k en-us -hdb certikos_disk.img
 QEMUOPTS_KVM	:= -cpu host -enable-kvm
 QEMUOPTS_BIOS	:= -L $(UTILSDIR)/qemu/
 
 # Targets
 
-.PHONY: all boot kern user deps qemu qemu-nox qemu-gdb
+.PHONY: all boot kern user deps qemu qemu-nox qemu-gdb mkfs
 
 
 all: boot kern user link
@@ -122,6 +122,7 @@ bochs: $(CERTIKOS_IMG) .bochsrc
 #	QEMU doesn't truncate the pcap file.  Work around this.
 pre-qemu: .gdbinit
 	@rm -f qemu.pcap
+	$(V)cp newfs/certikos_disk_new.img certikos_disk.img
 
 qemu: $(CERTIKOS_IMG) pre-qemu
 	$(V)$(QEMU) $(QEMUOPTS)
@@ -182,3 +183,8 @@ $(OBJDIR)/.deps: $(foreach dir, $(OBJDIRS), $(wildcard $(dir)/*.d))
 clean:
 	$(V)rm -rf $(OBJDIR) .gdbinit certikos.img
 	$(V)find . -name "*.[v]" -delete
+
+mkfs:
+	@echo "Copying the new file system disk image..."
+	$(V)cp newfs/certikos_disk_new.img certikos_disk.img
+	@echo "Done."

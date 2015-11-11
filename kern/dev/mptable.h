@@ -1,6 +1,5 @@
 // Multiprocessor bootstrap definitions.
 // See MultiProcessor Specification Version 1.[14]
-// This source file adapted from xv6.
 // See COPYRIGHT for copyright information.
 #ifndef _KERN_DEV_MPTABLE_H_
 #define _KERN_DEV_MPTABLE_H_

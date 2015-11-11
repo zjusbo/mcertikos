@@ -40,6 +40,7 @@ int
 vdprintf (const char *fmt, va_list ap)
 {
 
+    serial_lock();
     struct dprintbuf b;
 
     b.idx = 0;
@@ -48,6 +49,7 @@ vdprintf (const char *fmt, va_list ap)
 
     b.buf[b.idx] = 0;
     cputs (b.buf);
+    serial_unlock();
 
     return b.cnt;
 }

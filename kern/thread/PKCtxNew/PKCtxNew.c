@@ -15,10 +15,10 @@
  */
 unsigned int kctx_new(void *entry, unsigned int id, unsigned int quota)
 {
-	unsigned int pid;
-	pid = alloc_mem_quota(id, quota);
-	kctx_set_esp(pid, proc_kstack[pid].kstack_hi);
-	kctx_set_eip(pid, entry);
+  unsigned int pid;
+  pid = alloc_mem_quota(id, quota);
+  kctx_set_esp(pid, proc_kstack[pid].kstack_hi);
+  kctx_set_eip(pid, entry);
 
-	return pid;
+  return pid;
 }

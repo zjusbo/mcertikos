@@ -5,35 +5,17 @@
 
 unsigned int syscall_get_arg1(tf_t *tf)
 {
-	unsigned int cur_pid;
-	unsigned int arg1;
-
-	cur_pid = get_curid();
-	arg1 = tf -> regs.eax;
-
-	return arg1;
+  return tf -> regs.eax;
 }
 
 unsigned int syscall_get_arg2(tf_t *tf)
 {
-	unsigned int cur_pid;
-	unsigned int arg2;
-
-	cur_pid = get_curid();
-	arg2 = tf -> regs.ebx;
-
-	return arg2;
+  return tf -> regs.ebx;
 }
 
 unsigned int syscall_get_arg3(tf_t *tf)
 {
-	unsigned int cur_pid;
-	unsigned int arg3;
-
-	cur_pid = get_curid();
-	arg3 = tf -> regs.ecx;
-
-	return arg3;
+  return tf -> regs.ecx;
 }
 
 unsigned int syscall_get_arg4(tf_t *tf)
@@ -71,48 +53,30 @@ unsigned int syscall_get_arg6(tf_t *tf)
 
 void syscall_set_errno(tf_t *tf, unsigned int errno)
 {
-	unsigned int cur_pid;
-
-	cur_pid = get_curid();
   tf -> regs.eax = errno;
 }
 
 void syscall_set_retval1(tf_t *tf, unsigned int retval)
 {
-	unsigned int cur_pid;
-
-	cur_pid = get_curid();
   tf -> regs.ebx = retval;
 }
 
 void syscall_set_retval2(tf_t *tf, unsigned int retval)
 {
-	unsigned int cur_pid;
-
-	cur_pid = get_curid();
   tf -> regs.ecx = retval;
 }
 
 void syscall_set_retval3(tf_t *tf, unsigned int retval)
 {
-	unsigned int cur_pid;
-
-	cur_pid = get_curid();
   tf -> regs.edx = retval;
 }
 
 void syscall_set_retval4(tf_t *tf, unsigned int retval)
 {
-	unsigned int cur_pid;
-
-	cur_pid = get_curid();
   tf -> regs.esi = retval;
 }
 
 void syscall_set_retval5(tf_t *tf, unsigned int retval)
 {
-	unsigned int cur_pid;
-
-	cur_pid = get_curid();
   tf -> regs.edi = retval;
 }

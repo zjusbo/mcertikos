@@ -47,6 +47,9 @@
 #define IRQ_COPROCESSOR	13	/* Math coprocessor interrupt */
 #define IRQ_IDE1	14	/* IDE disk controller 1 interrupt */
 #define IRQ_IDE2	15	/* IDE disk controller 2 interrupt */
+#define IRQ_EHCI_1      16
+#define IRQ_ERROR       19
+#define IRQ_EHCI_2      23
 
 #define T_SYSCALL	48
 
