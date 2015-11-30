@@ -139,7 +139,6 @@ ide_rw(struct buf *b)
   for(pp=&idequeue; *pp; pp=&(*pp)->qnext)  //DOC:insert-queue
     ;
   *pp = b;
-  
   // Start disk if necessary.
   if(idequeue == b)
     ide_start(b);
@@ -147,6 +146,7 @@ ide_rw(struct buf *b)
   // Wait for request to finish.
   while((b->flags & (B_VALID|B_DIRTY)) != B_VALID){
     thread_sleep(b, &ide_lk);
+    
   }
 
   spinlock_release(&ide_lk);

@@ -147,7 +147,6 @@ inode_lock(struct inode *ip)
     thread_sleep(ip, &inode_cache.lock);
   ip->flags |= I_BUSY;
   spinlock_release(&inode_cache.lock);
-  
   if(!(ip->flags & I_VALID)){
     bp = bufcache_read(ip->dev, IBLOCK(ip->inum));
     dip = (struct dinode*)bp->data + ip->inum % IPB;
@@ -156,6 +155,7 @@ inode_lock(struct inode *ip)
     ip->minor = dip->minor;
     ip->nlink = dip->nlink;
     ip->size = dip->size;
+
     memmove(ip->addrs, dip->addrs, sizeof(ip->addrs));
     bufcache_release(bp);
     ip->flags |= I_VALID;
