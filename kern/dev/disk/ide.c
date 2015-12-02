@@ -14,6 +14,7 @@
 // You must hold ide_lk while manipulating queue.
 
 static spinlock_t ide_lk;
+spinlock_t buf_lock;
 static struct buf *idequeue;
 
 static int havedisk1;
@@ -40,6 +41,7 @@ ide_init(void)
   int i;
 
   spinlock_init(&ide_lk);
+  spinlock_init(&buf_lock);
   picenable(IRQ_IDE1);
   ioapicenable(IRQ_IDE1, pcpu_ncpu() - 1);
   ide_wait(0);

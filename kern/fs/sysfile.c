@@ -9,6 +9,7 @@
 #include <kern/lib/trap.h>
 #include <kern/lib/syscall.h>
 #include <kern/trap/TSyscallArg/export.h>
+#include <kern/lib/spinlock.h>
 
 #include "dir.h"
 #include "path.h"
@@ -50,6 +51,7 @@ fdalloc(struct file *f)
  * functions shall return -1 and set errno E_BADF to indicate the error.
  */
 char kern_buf[10000];
+extern spinlock_t buf_lock;
 void sys_read(tf_t *tf)
 {
   //TODO
@@ -59,6 +61,7 @@ void sys_read(tf_t *tf)
   unsigned int pid = get_curid();
   struct file * fp;
   int size_read;
+  spinlock_acquire(&buf_lock);
   fd = (int)syscall_get_arg2(tf);
   user_buf = syscall_get_arg3(tf);
   n = syscall_get_arg4(tf);
@@ -66,6 +69,7 @@ void sys_read(tf_t *tf)
     KERN_INFO("fd illegal\n");
     syscall_set_errno(tf, E_BADF); // BAD FILE DESCRIPTRR
     syscall_set_retval1(tf, -1);
+    spinlock_release(&buf_lock);
     return ;
   }
   if (user_buf < VM_USERLO || user_buf + n > VM_USERHI || n > sizeof(kern_buf)){
@@ -73,6 +77,7 @@ void sys_read(tf_t *tf)
     KERN_INFO("user_buf = %u, n = %u, VM_USERLO = %u, VM_USERHI = %u\n", user_buf, n, VM_USERLO, VM_USERHI);
     syscall_set_errno(tf, E_INVAL_ADDR);
     syscall_set_retval1(tf, -1);
+    spinlock_release(&buf_lock);
     return ;
   }
   fp = tcb_get_openfiles(pid)[fd];
@@ -80,6 +85,7 @@ void sys_read(tf_t *tf)
     KERN_INFO("fp illegal\n");
     syscall_set_retval1(tf, -1);
     syscall_set_errno(tf, E_BADF);
+    spinlock_release(&buf_lock);
     return ;
   } 
   size_read = file_read(fp, kern_buf, n);
@@ -87,6 +93,7 @@ void sys_read(tf_t *tf)
        pt_copyout(kern_buf, get_curid(), user_buf, size_read); 
   syscall_set_retval1(tf, size_read);
   syscall_set_errno(tf, E_SUCC);
+  spinlock_release(&buf_lock);
   return ;
 }
 
@@ -108,29 +115,34 @@ void sys_write(tf_t *tf)
   unsigned int pid = get_curid();
   struct file * fp;
   int size_write;
+  spinlock_acquire(&buf_lock);
   fd = (int)syscall_get_arg2(tf);
   user_buf = syscall_get_arg3(tf);
   n = syscall_get_arg4(tf);
   if(fd < 0 || fd >= NOFILE || n < 0){
     syscall_set_errno(tf, E_BADF); // BAD FILE DESCRIPTRR
     syscall_set_retval1(tf, -1);
+    spinlock_release(&buf_lock);
     return ;
   }
   if (user_buf < VM_USERLO || user_buf + n > VM_USERHI || n > sizeof(kern_buf)){
     syscall_set_errno(tf, E_INVAL_ADDR);
     syscall_set_retval1(tf, -1);
+    spinlock_release(&buf_lock);
     return ;
   }
   fp = tcb_get_openfiles(pid)[fd];
   if(fp == 0 || fp->ip == 0){
     syscall_set_retval1(tf, -1);
     syscall_set_errno(tf, E_BADF);
+    spinlock_release(&buf_lock);
     return ;
   } 
   pt_copyin(pid, user_buf, kern_buf, n); 
   size_write = file_write(fp, kern_buf, n);
   syscall_set_retval1(tf, size_write);
   syscall_set_errno(tf, E_SUCC);
+  spinlock_release(&buf_lock);
   return ;
 }
 
