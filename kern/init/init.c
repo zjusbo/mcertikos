@@ -1,15 +1,13 @@
 #include <lib/debug.h>
 #include <lib/types.h>
 #include <lib/monitor.h>
-#include <pmm/MATInit/export.h>
-
-#define NUM_CHAN		64
-#define TD_STATE_RUN		1
+#include <thread/PThread/export.h>
 
 #ifdef TEST
-extern bool test_MATIntro(void);
-extern bool test_MATInit(void);
-extern bool test_MATOp(void);
+extern bool test_PKCtxNew(void);
+extern bool test_PTCBInit(void);
+extern bool test_PTQueueInit(void);
+extern bool test_PThread(void);
 #endif
 
 static void
@@ -18,35 +16,43 @@ kern_main (void)
     KERN_DEBUG("In kernel main.\n\n");
 
     #ifdef TEST
-    dprintf("Testing the MATIntro layer...\n");
-    if(test_MATIntro() == 0)
+    dprintf("Testing the PKCtxNew layer...\n");
+    if(test_PKCtxNew() == 0)
       dprintf("All tests passed.\n");
     else
       dprintf("Test failed.\n");
     dprintf("\n");
 
-    dprintf("Testing the MATInit layer...\n");
-    if(test_MATInit() == 0)
+    dprintf("Testing the PTCBInit layer...\n");
+    if(test_PTCBInit() == 0)
       dprintf("All tests passed.\n");
     else
       dprintf("Test failed.\n");
     dprintf("\n");
 
-    dprintf("Testing the MATOp layer...\n");
-    if(test_MATOp() == 0)
+    dprintf("Testing the PTQueueInit layer...\n");
+    if(test_PTQueueInit() == 0)
       dprintf("All tests passed.\n");
     else
       dprintf("Test failed.\n");
     dprintf("\n");
-    #endif
 
+    dprintf("Testing the PThread layer...\n");
+    if(test_PThread() == 0)
+      dprintf("All tests passed.\n");
+    else
+      dprintf("Test failed.\n");
+    dprintf("\n");
+    dprintf("\nTest complete. Please Use Ctrl-a x to exit qemu.");
+    #else
     monitor(NULL);
+    #endif
 }
 
 void
 kern_init (uintptr_t mbi_addr)
 {
-    pmem_init (mbi_addr);
+    thread_init(mbi_addr);
 
     KERN_DEBUG("Kernel initialized.\n");
 

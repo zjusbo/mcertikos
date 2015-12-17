@@ -15,7 +15,7 @@ CLIGHTGEN_FLAGS   += -D_KERN_ -I$(KERN_DIR) -I$(KERN_DIR)/kern -I.
 endif
 
 ifdef DEBUG_MSG
-KERN_CFLAGS	+= -O0
+KERN_CFLAGS	+= -Og -g
 else
 KERN_CFLAGS	+= -O2
 endif
@@ -29,6 +29,10 @@ include		$(KERN_DIR)/dev/Makefile.inc
 include		$(KERN_DIR)/lib/Makefile.inc
 include		$(KERN_DIR)/init/Makefile.inc
 include		$(KERN_DIR)/pmm/Makefile.inc
+include		$(KERN_DIR)/vmm/Makefile.inc
+include		$(KERN_DIR)/thread/Makefile.inc
+include		$(KERN_DIR)/proc/Makefile.inc
+include		$(KERN_DIR)/trap/Makefile.inc
 
 KERN_CFLAGS	+= $(KERN_DEBUG_FLAGS)
 KERN_CFLAGS	+= -DSERIAL_DEBUG -DDEBUG_MSG
@@ -44,8 +48,17 @@ KERN_OBJFILES	:= $(patsubst %.S, $(OBJDIR)/%.o, $(KERN_OBJFILES))
 
 # Targets
 
-kern: $(KERN_OBJDIR)/kernel
-	@echo All targets of kernel are done.
+kern: $(KERN_OBJFILES) $(KERN_BINFILES)
+	@echo All targets of kernel are compiled.
+
+link: $(KERN_OBJDIR)/kernel
+
+# Link kernel
+$(KERN_OBJDIR)/kernel: $(KERN_OBJFILES) $(KERN_BINFILES) 
+	@echo + ld[KERN] $@
+	$(V)$(LD) -o $@ $(KERN_LDFLAGS) $(KERN_OBJFILES) $(GCC_LIBS) -b binary $(KERN_BINFILES)
+	$(V)$(OBJDUMP) -S $@ > $@.asm
+	$(V)$(NM) -n $@ > $@.sym
 
 install_kern: $(KERN_OBJDIR)/kernel $(CERTIKOS_IMG)
 	@echo + copy kernel to /boot/kernel
@@ -58,9 +71,3 @@ kern_coq: $(KERN_CCOMP_SRC)
 	@echo + clightgen $(KERN_CCOMP_SRC)
 	$(V)$(CLIGHTGEN) $(CLIGHTGEN_FLAGS) $(KERN_CCOMP_SRC)
 
-# Link kernel
-$(KERN_OBJDIR)/kernel: $(KERN_OBJFILES) $(KERN_BINFILES)
-	@echo + ld[KERN] $@
-	$(V)$(LD) -o $@ $(KERN_LDFLAGS) $(KERN_OBJFILES) $(GCC_LIBS) -b binary $(KERN_BINFILES)
-	$(V)$(OBJDUMP) -S $@ > $@.asm
-	$(V)$(NM) -n $@ > $@.sym

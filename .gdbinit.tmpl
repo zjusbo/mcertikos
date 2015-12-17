@@ -30,3 +30,15 @@ echo + symbol-file obj/kern/kernel\n
 symbol-file obj/boot/boot0.elf
 add-symbol-file obj/boot/boot1.elf 0x7e00
 add-symbol-file obj/kern/kernel 0x100000
+add-symbol-file obj/user/idle/idle 0x40000000
+add-symbol-file obj/user/pingpong/ping 0x40000000
+add-symbol-file obj/user/pingpong/pong 0x40000000
+add-symbol-file obj/user/pingpong/ding 0x40000000
+
+layout asm
+winheight asm 50
+
+layout reg
+winheight reg 8
+
+focus cmd
