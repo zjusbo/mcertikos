@@ -6,6 +6,7 @@
 #include <lib/kstack.h>
 #include <lib/trap.h>
 #include <vmm/MPTInit/export.h>
+#include <lib/ipc.h>
 
 #include "console.h"
 #include "mboot.h"
@@ -54,6 +55,8 @@ devinit (uintptr_t mbi_addr)
 	inode_init();         // inode cache
 	ide_init ();
 	KERN_INFO("[BSP KERN] IDE disk driver initialized\n");
+        ipc_init(); 
+	KERN_INFO("[BSP KERN] IPC initialized\n");
 }
 
 void 

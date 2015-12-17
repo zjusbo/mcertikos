@@ -21,7 +21,31 @@ sys_puts(const char *s, size_t len)
 		     : "cc", "memory");
 }
 
+// TODO : assign 6 ipc, added by sbo
+static gcc_inline void
+sys_sync_send(int recv_pid, const char* addr, size_t len)
+{
+	asm volatile("int %0" :
+		     : "i" (T_SYSCALL),
+		       "a" (SYS_sync_send),
+		       "b" (recv_pid),
+		       "c" (addr),
+                       "d" (len)
+		     : "cc", "memory");
+}
+static gcc_inline void
+sys_sync_receive(int send_pid, char* addr, size_t len)
+{
+	asm volatile("int %0" :
+		     : "i" (T_SYSCALL),
+		       "a" (SYS_sync_recv),
+		       "b" (send_pid),
+		       "c" (addr),
+                       "d" (len)
+		     : "cc", "memory");
+}
 static gcc_inline pid_t
+
 sys_spawn(uintptr_t exec, unsigned int quota)
 {
 	int errno;

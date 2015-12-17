@@ -15,6 +15,12 @@ void syscall_dispatch(tf_t *tf)
   nr = syscall_get_arg1(tf);
 
   switch (nr) {
+  case SYS_sync_send:
+    sys_sync_send(tf);
+    break;
+  case SYS_sync_recv:
+    sys_sync_recv(tf);
+    break;
   case SYS_puts:
     /*
      * Output a string to the screen.

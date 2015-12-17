@@ -4,9 +4,63 @@
 #include <lib/trap.h>
 #include <lib/syscall.h>
 #include <dev/intr.h>
+#include <lib/ipc.h>
 #include <pcpu/PCPUIntro/export.h>
 
 #include "import.h"
+
+extern struct MsgBlock msgBlock[NUM_IDS];
+extern spinlock_t msg_lock;
+
+// recv_id, user_buffer_addr, length
+void sys_sync_send(tf_t *tf){
+   unsigned int cur_pid;
+   unsigned int recv_pid, user_addr, length;
+   spinlock_acquire(&msg_lock); 
+   recv_pid = syscall_get_arg2(tf);
+   user_addr = syscall_get_arg3(tf);
+   length = syscall_get_arg4(tf);
+   cur_pid = get_curid();
+   msgBlock[cur_pid].recv_pid = recv_pid; 
+   msgBlock[cur_pid].buffer_addr = user_addr;
+   msgBlock[cur_pid].length = length;
+   msg_enqueue(cur_pid);
+   thread_wakeup(&msgBlock[cur_pid].send_cv); 
+   // cur_pid has not been read, block and wait for it
+   while(msg_getBlockBySendID(cur_pid) != NUM_IDS){
+      thread_sleep(&msgBlock[cur_pid].recv_cv, &msg_lock);
+   } 
+   syscall_set_errno(tf, E_SUCC);
+   spinlock_release(&msg_lock); 
+}
+
+void sys_sync_recv(tf_t *tf){
+   unsigned int cur_pid;
+   unsigned int send_pid, user_recv_addr, recv_length, send_length, copy_length, user_send_addr;
+   spinlock_acquire(&msg_lock); 
+   
+   send_pid = syscall_get_arg2(tf);
+   user_recv_addr = syscall_get_arg3(tf);
+   recv_length = syscall_get_arg4(tf);
+   cur_pid = get_curid();
+   
+   // loop if current pid has no received message or received message is not sent from target process
+   while(msg_getBlockBySendID(send_pid) == NUM_IDS || msgBlock[send_pid].recv_pid != cur_pid){
+      thread_sleep(&msgBlock[send_pid].send_cv, &msg_lock);
+   }
+   // message received
+   user_send_addr = msgBlock[send_pid].buffer_addr;
+   send_length = msgBlock[send_pid].length;
+
+   // find the min of send_length and recv_length, then copy data from source process addressing space to dest process addressing space 
+   copy_length = send_length < recv_length? send_length: recv_length;
+   ipc_copy(cur_pid, user_recv_addr, send_pid, user_send_addr, copy_length);
+   msg_remove(send_pid);
+   thread_wakeup(&msgBlock[send_pid].recv_cv);
+   syscall_set_errno(tf, E_SUCC);
+   syscall_set_retval1(tf, copy_length);
+   spinlock_release(&msg_lock); 
+}
 
 static char sys_buf[NUM_IDS][PAGESIZE];
 
