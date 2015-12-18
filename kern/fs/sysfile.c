@@ -9,6 +9,7 @@
 #include <kern/lib/trap.h>
 #include <kern/lib/syscall.h>
 #include <kern/trap/TSyscallArg/export.h>
+#include <kern/lib/spinlock.h>
 
 #include "dir.h"
 #include "path.h"
@@ -27,6 +28,15 @@ static int
 fdalloc(struct file *f)
 {
   //TODO
+  int idx;
+  int curid = get_curid();
+  struct file ** fds = tcb_get_openfiles(curid);
+  for(idx = 0; idx < NOFILE; idx++){ 
+    if(fds[idx] == 0){
+      tcb_set_openfiles(curid, idx, f);
+      return idx;
+    }
+  }
   return -1;
 }
 
@@ -40,9 +50,51 @@ fdalloc(struct file *f)
  * integer indicating the number of bytes actually read. Otherwise, the
  * functions shall return -1 and set errno E_BADF to indicate the error.
  */
+char kern_buf[10000];
+extern spinlock_t buf_lock;
 void sys_read(tf_t *tf)
 {
   //TODO
+  int fd;
+  unsigned int user_buf;
+  unsigned int  n;
+  unsigned int pid = get_curid();
+  struct file * fp;
+  int size_read;
+  spinlock_acquire(&buf_lock);
+  fd = (int)syscall_get_arg2(tf);
+  user_buf = syscall_get_arg3(tf);
+  n = syscall_get_arg4(tf);
+  if(fd < 0 || fd >= NOFILE || n < 0){
+    KERN_INFO("fd illegal\n");
+    syscall_set_errno(tf, E_BADF); // BAD FILE DESCRIPTRR
+    syscall_set_retval1(tf, -1);
+    spinlock_release(&buf_lock);
+    return ;
+  }
+  if (user_buf < VM_USERLO || user_buf + n > VM_USERHI || n > sizeof(kern_buf)){
+    KERN_INFO("user_buf illegal\n");
+    KERN_INFO("user_buf = %u, n = %u, VM_USERLO = %u, VM_USERHI = %u\n", user_buf, n, VM_USERLO, VM_USERHI);
+    syscall_set_errno(tf, E_INVAL_ADDR);
+    syscall_set_retval1(tf, -1);
+    spinlock_release(&buf_lock);
+    return ;
+  }
+  fp = tcb_get_openfiles(pid)[fd];
+  if(fp == 0 || fp->ip == 0){
+    KERN_INFO("fp illegal\n");
+    syscall_set_retval1(tf, -1);
+    syscall_set_errno(tf, E_BADF);
+    spinlock_release(&buf_lock);
+    return ;
+  } 
+  size_read = file_read(fp, kern_buf, n);
+  if(size_read > 0)
+       pt_copyout(kern_buf, get_curid(), user_buf, size_read); 
+  syscall_set_retval1(tf, size_read);
+  syscall_set_errno(tf, E_SUCC);
+  spinlock_release(&buf_lock);
+  return ;
 }
 
 /**
@@ -56,7 +108,42 @@ void sys_read(tf_t *tf)
  */
 void sys_write(tf_t *tf)
 {
-  //TODO
+ //TODO
+  int fd;
+  unsigned int user_buf;
+  unsigned n;
+  unsigned int pid = get_curid();
+  struct file * fp;
+  int size_write;
+  spinlock_acquire(&buf_lock);
+  fd = (int)syscall_get_arg2(tf);
+  user_buf = syscall_get_arg3(tf);
+  n = syscall_get_arg4(tf);
+  if(fd < 0 || fd >= NOFILE || n < 0){
+    syscall_set_errno(tf, E_BADF); // BAD FILE DESCRIPTRR
+    syscall_set_retval1(tf, -1);
+    spinlock_release(&buf_lock);
+    return ;
+  }
+  if (user_buf < VM_USERLO || user_buf + n > VM_USERHI || n > sizeof(kern_buf)){
+    syscall_set_errno(tf, E_INVAL_ADDR);
+    syscall_set_retval1(tf, -1);
+    spinlock_release(&buf_lock);
+    return ;
+  }
+  fp = tcb_get_openfiles(pid)[fd];
+  if(fp == 0 || fp->ip == 0){
+    syscall_set_retval1(tf, -1);
+    syscall_set_errno(tf, E_BADF);
+    spinlock_release(&buf_lock);
+    return ;
+  } 
+  pt_copyin(pid, user_buf, kern_buf, n); 
+  size_write = file_write(fp, kern_buf, n);
+  syscall_set_retval1(tf, size_write);
+  syscall_set_errno(tf, E_SUCC);
+  spinlock_release(&buf_lock);
+  return ;
 }
 
 
@@ -67,6 +154,26 @@ void sys_write(tf_t *tf)
 void sys_close(tf_t *tf)
 {
   //TODO
+  unsigned int fd;
+  struct file * fp;
+  unsigned int pid = get_curid();
+  fd = syscall_get_arg2(tf);
+  if(fd < 0 || fd >= NOFILE){
+    syscall_set_retval1(tf, -1);
+    syscall_set_errno(tf, E_BADF);
+    return ;
+  }
+  fp = tcb_get_openfiles(pid)[fd];
+  if(fp == 0){ // fd does not exist
+    syscall_set_retval1(tf, -1);
+    syscall_set_errno(tf, E_BADF);
+    return ;
+  }
+  file_close(fp);
+  tcb_set_openfiles(pid, fd, 0);
+  syscall_set_retval1(tf, 0);
+  syscall_set_errno(tf, E_SUCC);
+  return ; 
 }
 
 /**
@@ -76,6 +183,32 @@ void sys_close(tf_t *tf)
 void sys_fstat(tf_t *tf)
 {
   //TODO
+  int fd = (int)syscall_get_arg2(tf);
+  struct file_stat* user_stp = (struct file_stat *)syscall_get_arg3(tf);
+  struct file_stat kern_st;
+  struct file * fp;
+  if(fd < 0 || fd >= NOFILE || (unsigned int)user_stp < VM_USERLO || (unsigned int)user_stp + sizeof(struct file_stat) > VM_USERHI){
+    syscall_set_retval1(tf, -1);
+    syscall_set_errno(tf, E_BADF);
+    return ;  
+  }
+  fp = tcb_get_openfiles(get_curid())[fd];
+  if(fp == 0){ // fd does not exist
+    syscall_set_retval1(tf, -1);
+    syscall_set_errno(tf, E_BADF);
+    return ;
+  }
+ 
+  pt_copyin(get_curid(), user_stp, &kern_st, sizeof(struct file_stat));  
+  int state = file_stat(fp, &kern_st); 
+  syscall_set_retval1(tf, state);
+  if(state == 0){
+    syscall_set_errno(tf, E_SUCC);
+  }
+  else{
+    syscall_set_errno(tf, E_BADF);
+  }
+  return ;
 }
 
 /**
@@ -85,10 +218,15 @@ void sys_link(tf_t *tf)
 {
   char name[DIRSIZ], new[128], old[128];
   struct inode *dp, *ip;
-
-  pt_copyin(get_curid(), syscall_get_arg2(tf), old, 128);
-  pt_copyin(get_curid(), syscall_get_arg3(tf), new, 128);
-
+  unsigned int old_len, new_len;
+  old_len = syscall_get_arg4(tf);
+  new_len = syscall_get_arg5(tf);
+  old_len = old_len < 128? old_len: 127;
+  new_len = new_len < 128? new_len: 127;
+  pt_copyin(get_curid(), syscall_get_arg2(tf), old, old_len);
+  pt_copyin(get_curid(), syscall_get_arg3(tf), new, new_len);
+  old[old_len] = '\0';
+  new[new_len] = '\0';
   if((ip = namei(old)) == 0){
     syscall_set_errno(tf, E_NEXIST);
     return;
@@ -158,8 +296,10 @@ void sys_unlink(tf_t *tf)
   struct dirent de;
   char name[DIRSIZ], path[128];
   uint32_t off;
-
-  pt_copyin(get_curid(), syscall_get_arg2(tf), path, 128);
+  unsigned int path_len = syscall_get_arg3(tf);
+  path_len = path_len < 128? path_len: 127;
+  pt_copyin(get_curid(), syscall_get_arg2(tf), path, path_len);
+  path[path_len] = '\0';
 
   if((dp = nameiparent(path, name)) == 0){
     syscall_set_errno(tf, E_DISK_OP);
@@ -263,14 +403,17 @@ void sys_open(tf_t *tf)
   int fd, omode;
   struct file *f;
   struct inode *ip;
-
+  unsigned int path_len;
   static int first = TRUE;
   if (first) {
     first = FALSE;
     log_init();
   }
+  path_len = syscall_get_arg4(tf);
+  path_len = path_len < 128? path_len: 127;
+  pt_copyin(get_curid(), syscall_get_arg2(tf), path, path_len);
 
-  pt_copyin(get_curid(), syscall_get_arg2(tf), path, 128);
+  path[path_len] = '\0';
   omode = syscall_get_arg3(tf);
 
   if (!path)
@@ -323,8 +466,10 @@ void sys_mkdir(tf_t *tf)
 {
   char path[128];
   struct inode *ip;
-
-  pt_copyin(get_curid(), syscall_get_arg2(tf), path, 128);
+  unsigned int path_len = syscall_get_arg3(tf);
+  path_len = path_len < 128? path_len: 127;
+  pt_copyin(get_curid(), syscall_get_arg2(tf), path, path_len);
+  path[path_len] = '\0';
 
   begin_trans();
   if((ip = (struct inode*)create(path, T_DIR, 0, 0)) == 0){
@@ -342,8 +487,10 @@ void sys_chdir(tf_t *tf)
   char path[128];
   struct inode *ip;
   int pid = get_curid();
-
-  pt_copyin(get_curid(), syscall_get_arg2(tf), path, 128);
+  unsigned int path_len = syscall_get_arg3(tf); 
+  path_len = path_len < 128? path_len: 127;
+  pt_copyin(get_curid(), syscall_get_arg2(tf), path, path_len);
+  path[path_len] = '\0';
 
   if((ip = namei(path)) == 0){
     syscall_set_errno(tf, E_DISK_OP);

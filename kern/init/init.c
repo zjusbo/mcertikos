@@ -20,6 +20,7 @@ static volatile int all_ready = FALSE;
 static void kern_main_ap(void);
 
 extern uint8_t _binary___obj_user_idle_idle_start[];
+extern uint8_t _binary___obj_user_pingpong_ding_start[];
 
 static void
 kern_main (void)
@@ -50,6 +51,7 @@ kern_main (void)
     all_ready = TRUE;
     */
     pid = proc_create (_binary___obj_user_idle_idle_start, 1000);
+    pid = proc_create (_binary___obj_user_pingpong_ding_start, 1000);
     KERN_INFO("CPU%d: process idle %d is created.\n", cpu_idx, pid);
     tqueue_remove (NUM_IDS, pid);
     tcb_set_state (pid, TSTATE_RUN);

@@ -301,7 +301,7 @@ subdir(void)
   }
   write(fd, "ff", 2);
   close(fd);
-  
+    
   if(unlink("dd") >= 0){
     printf("unlink dd (non-empty dir) succeeded!\n");
     exit();
@@ -322,12 +322,14 @@ subdir(void)
   close(fd);
 
   fd = open("dd/dd/../ff", 0);
+  //fd = open("dd/ff", 0);
   if(fd < 0){
     printf("open dd/dd/../ff failed\n");
     exit();
   }
   cc = read(fd, buf, sizeof(buf));
   if(cc != 2 || buf[0] != 'f'){
+    printf("cc = %d, buf[0] = %c\n", cc, buf[0]);
     printf("dd/dd/../ff wrong content\n");
     exit();
   }

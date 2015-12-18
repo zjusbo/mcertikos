@@ -5,6 +5,7 @@
 #define T_FILE 2   // File
 #define T_DEV  3   // Device
 
+//#include <lib/types.h>
 struct file_stat {
   int16_t type;    // Type of file
   uint32_t dev;    // File system's disk device

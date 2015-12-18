@@ -100,7 +100,10 @@ void sched_update(void)
 void thread_sleep (void *chan, spinlock_t *lk)
 {
   //TODO: your local variables here.
-
+  
+  unsigned int curid = get_curid();
+  unsigned int new_cur_pid;
+  unsigned int i;
   if (lk == 0)
     KERN_PANIC("sleep without lock");
 
@@ -112,13 +115,31 @@ void thread_sleep (void *chan, spinlock_t *lk)
   // (wakeup runs with sched_lk locked),
   // so it's okay to release lock.
 
+  //acquire the scheduler lock
+  spinlock_acquire(&sched_lk);
+  
+  //release the original lock
+  spinlock_release(lk);
+
   // TODO: Go to sleep.
+  tcb_set_state(curid, TSTATE_SLEEP);
+  tcb_set_chan(curid, chan);
+  
 
   // TODO: Context switch.
+  // here we assume a new ready process always exists
+  new_cur_pid = tqueue_dequeue(NUM_IDS);
+  tcb_set_state(new_cur_pid, TSTATE_RUN);
+  set_curid(new_cur_pid);
+  spinlock_release(&sched_lk);
+  kctx_switch(curid, new_cur_pid);
   
   // TODO: Tidy up.
-
+  spinlock_acquire(&sched_lk);
+  tcb_set_chan(curid, 0);
   // TODO: Reacquire original lock.
+  spinlock_release(&sched_lk);
+  spinlock_acquire(lk);
 }
 
 /**
@@ -127,4 +148,15 @@ void thread_sleep (void *chan, spinlock_t *lk)
 void thread_wakeup (void *chan)
 {
   //TODO
+  spinlock_acquire(&sched_lk);
+  unsigned int pid;
+  for (pid = 1; pid < NUM_IDS; ++pid) {
+    if (tcb_get_chan(pid) == chan && tcb_get_state(pid) == TSTATE_SLEEP) {
+      //wake up and put into ready queue
+      tcb_set_state(pid, TSTATE_READY);
+      tcb_set_chan(pid, 0);
+      tqueue_enqueue(NUM_IDS, pid);
+    }
+  }
+  spinlock_release(&sched_lk);
 }

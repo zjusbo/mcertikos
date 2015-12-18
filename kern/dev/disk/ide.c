@@ -14,6 +14,7 @@
 // You must hold ide_lk while manipulating queue.
 
 static spinlock_t ide_lk;
+spinlock_t buf_lock;
 static struct buf *idequeue;
 
 static int havedisk1;
@@ -40,6 +41,7 @@ ide_init(void)
   int i;
 
   spinlock_init(&ide_lk);
+  spinlock_init(&buf_lock);
   picenable(IRQ_IDE1);
   ioapicenable(IRQ_IDE1, pcpu_ncpu() - 1);
   ide_wait(0);
@@ -139,7 +141,6 @@ ide_rw(struct buf *b)
   for(pp=&idequeue; *pp; pp=&(*pp)->qnext)  //DOC:insert-queue
     ;
   *pp = b;
-  
   // Start disk if necessary.
   if(idequeue == b)
     ide_start(b);
@@ -147,6 +148,7 @@ ide_rw(struct buf *b)
   // Wait for request to finish.
   while((b->flags & (B_VALID|B_DIRTY)) != B_VALID){
     thread_sleep(b, &ide_lk);
+    
   }
 
   spinlock_release(&ide_lk);

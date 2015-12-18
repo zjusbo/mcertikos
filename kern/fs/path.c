@@ -37,8 +37,20 @@
 static char*
 skipelem(char *path, char *name)
 {
-  //TODO 
-  return 0;
+  char* start, *end;
+  uint32_t len;
+  start = path;
+  //TODO
+  if(path == 0 || *path == '\0') return 0;
+  while(*start == '/') start++; //omit leading slashes
+  end = start;
+  if(*end == '\0') return 0;
+  while(*end != '/' && *end != '\0') end++; // find end of current element
+  len = end - start >= DIRSIZ? DIRSIZ - 1: end - start;
+  strncpy(name, start, len);
+  name[len] = '\0';
+  while(*end == '/') end++; // remove tailing slashes
+  return end;
 }
 
 /**
@@ -50,8 +62,9 @@ skipelem(char *path, char *name)
 static struct inode*
 namex(char *path, bool nameiparent, char *name)
 {
+  uint32_t off;
   struct inode *ip;
-
+  struct inode *subdir;
   // If path is a full path, get the pointer to the root inode. Otherwise get
   // the inode corresponding to the current working directory.
   if(*path == '/'){
@@ -63,6 +76,24 @@ namex(char *path, bool nameiparent, char *name)
 
   while((path = skipelem(path, name)) != 0){
     //TODO
+    inode_lock(ip); 
+    if(ip->type != T_DIR){
+      inode_unlockput(ip);
+      return 0;
+    }
+    if(nameiparent && *path == '\0'){
+      // stop early
+      inode_unlock(ip);
+      return ip;
+    }
+    subdir = dir_lookup(ip, name, &off);
+    if(subdir == 0){
+      // subdir not found
+      inode_unlockput(ip);
+      return 0;
+    }
+    inode_unlockput(ip);
+    ip = subdir;
   }
   if(nameiparent){
     inode_put(ip);
