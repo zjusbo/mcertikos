@@ -21,7 +21,31 @@ sys_puts(const char *s, size_t len)
 		     : "cc", "memory");
 }
 
+// TODO : assign 6 ipc, added by sbo
+static gcc_inline void
+sys_sync_send(int recv_pid, const char* addr, size_t len)
+{
+	asm volatile("int %0" :
+		     : "i" (T_SYSCALL),
+		       "a" (SYS_sync_send),
+		       "b" (recv_pid),
+		       "c" (addr),
+                       "d" (len)
+		     : "cc", "memory");
+}
+static gcc_inline void
+sys_sync_receive(int send_pid, char* addr, size_t len)
+{
+	asm volatile("int %0" :
+		     : "i" (T_SYSCALL),
+		       "a" (SYS_sync_recv),
+		       "b" (send_pid),
+		       "c" (addr),
+                       "d" (len)
+		     : "cc", "memory");
+}
 static gcc_inline pid_t
+
 sys_spawn(uintptr_t exec, unsigned int quota)
 {
 	int errno;
@@ -147,14 +171,18 @@ static gcc_inline int
 sys_link(char *old, char* new)
 {
   int errno, ret;
-
+  unsigned int old_len, new_len;
+  old_len = strlen(old);
+  new_len = strlen(new);
 	asm volatile("int %2"
 		     : "=a" (errno),
 		       "=b" (ret)
 		     : "i" (T_SYSCALL),
 		       "a" (SYS_link),
 		       "b" (old),
-		       "c" (new)
+		       "c" (new),
+                       "d" (old_len),
+                       "S" (new_len)
 		     : "cc", "memory");
 
 	return errno ? -1 : 0;
@@ -164,13 +192,14 @@ static gcc_inline int
 sys_unlink(char *path)
 {
   int errno, ret;
-
+  unsigned int len = strlen(path);
 	asm volatile("int %2"
 		     : "=a" (errno),
 		       "=b" (ret)
 		     : "i" (T_SYSCALL),
 		       "a" (SYS_unlink),
-		       "b" (path)
+		       "b" (path),
+                       "c" (len)
 		     : "cc", "memory");
 
 	return errno ? -1 : 0;
@@ -181,14 +210,15 @@ sys_open(char *path, int omode)
 {
 	int errno;
 	int fd;
-
+        unsigned int len = strlen(path);
 	asm volatile("int %2"
 		     : "=a" (errno),
 		       "=b" (fd)
 		     : "i" (T_SYSCALL),
 		       "a" (SYS_open),
 		       "b" (path),
-		       "c" (omode)
+		       "c" (omode),
+                       "d" (len)
 		     : "cc", "memory");
 
 	return errno ? -1 : fd;
@@ -198,13 +228,14 @@ static gcc_inline int
 sys_mkdir(char *path)
 {
   int errno, ret;
-
+  unsigned int len = strlen(path);
 	asm volatile("int %2"
 		     : "=a" (errno),
 		       "=b" (ret)
 		     : "i" (T_SYSCALL),
 		       "a" (SYS_mkdir),
-		       "b" (path)
+		       "b" (path),
+                       "c" (len)
 		     : "cc", "memory");
 
 	return errno ? -1 : 0;
@@ -214,13 +245,14 @@ static gcc_inline int
 sys_chdir(char *path)
 {
   int errno, ret;
-
+  unsigned int len = strlen(path);
 	asm volatile("int %2"
 		     : "=a" (errno),
 		       "=b" (ret)
 		     : "i" (T_SYSCALL),
 		       "a" (SYS_chdir),
-		       "b" (path)
+		       "b" (path),
+                       "c" (len)
 		     : "cc", "memory");
 
 	return errno ? -1 : 0;

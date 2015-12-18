@@ -49,7 +49,6 @@ kern_main (void)
 
     all_ready = TRUE;
     */
-    
     pid = proc_create (_binary___obj_user_idle_idle_start, 1000);
     KERN_INFO("CPU%d: process idle %d is created.\n", cpu_idx, pid);
     tqueue_remove (NUM_IDS, pid);
