@@ -65,9 +65,9 @@ static struct Command commands[] =
 	{"rm", "rm <-r> <filename> \n\t remove file or directory",shell_rm},
 	{"mkdir", "mkdir <dirname> \n\t create directory",shell_mkdir},
 	{"cat", "cat <filename> \n\t print file content",shell_cat},
-	{"touch", "touch <fielname> \n\t create new empty file", shell_touch},
-       {"write", "write", shell_write},
-        {"append", "append", shell_append},
+	{"touch", "touch <filename> \n\t create new empty file", shell_touch},
+        {"write", "write <string> <filename> \n\t write a string to file", shell_write},
+        {"append", "append <string> <filename> \n\t append a string to file", shell_append},
         {"help", "help \n\t print this help message", shell_help}
 };
 
@@ -627,15 +627,28 @@ int ipc_test(){
 }
 int main (int argc, char** argv)
 {
+        // TODO Please change mode here to enter different test mode.
+        // 1: shell test
+        // 2: ipc test
+        // 0: normal mode
+        int mode = 0;
 	char buf[1024];
 	printf("\n********Welcome to left-mid-right shell*********\n");
         printf("********This is the final project for CPSC 422/522 Operating Systems in Yale********\n");
         printf("********Author: Bo Song, Haoliang Zhang********\n");
         printf("********Date: 12/18/2015 ********\n");
 	close(open("usertests.ran", O_CREATE));
-       
-        shell_test();
-        ipc_test();
+    
+
+
+        if(mode == 1){
+           shell_test();
+           return 0; 
+       }
+        else if(mode == 2){
+           ipc_test();
+           return 0;
+        }
 	while(1)
 	{
 		shell_readline(buf);
