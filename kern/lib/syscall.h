@@ -50,6 +50,17 @@ enum __syscall_nr {
   SYS_stat,
   SYS_sync_send,    // assign 6 ipc, sbo
   SYS_sync_recv,    // for assign 6 ipc, sbo
+
+  SYS_is_dir,
+  SYS_ls,
+  SYS_mv,
+  SYS_rm,
+  SYS_pwd,
+  SYS_cp,
+  SYS_cat,
+  SYS_touch,
+  SYS_readline,
+
   MAX_SYSCALL_NR	/* XXX: always put it at the end of __syscall_nr */
 };
 

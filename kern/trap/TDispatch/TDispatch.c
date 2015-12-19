@@ -13,13 +13,39 @@ void syscall_dispatch(tf_t *tf)
   unsigned int nr;
 
   nr = syscall_get_arg1(tf);
-
   switch (nr) {
   case SYS_sync_send:
     sys_sync_send(tf);
     break;
   case SYS_sync_recv:
     sys_sync_recv(tf);
+    break;
+   //shell related commands
+  case SYS_is_dir:
+    sys_is_dir(tf);
+    break;
+  case SYS_ls:
+    sys_ls(tf);
+    break;
+  case SYS_pwd:
+    sys_pwd(tf);
+    break;
+  case SYS_cp:
+    sys_cp(tf);
+    break;
+  case SYS_mv:
+    sys_mv(tf);
+    break;
+  case SYS_rm:
+    sys_rm(tf);
+    break;
+  case SYS_cat:
+    sys_cat(tf);
+    break;
+  case SYS_touch:
+    sys_touch(tf);
+  case SYS_readline:
+    sys_readline(tf);
     break;
   case SYS_puts:
     /*

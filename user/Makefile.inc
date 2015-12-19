@@ -14,6 +14,7 @@ include $(USER_DIR)/lib/Makefile.inc
 include $(USER_DIR)/idle/Makefile.inc
 include $(USER_DIR)/pingpong/Makefile.inc
 include $(USER_DIR)/fstest/Makefile.inc
+include $(USER_DIR)/shell/Makefile.inc
 
 user: lib idle pingpong fstest
 	@echo All targets of user are done.
