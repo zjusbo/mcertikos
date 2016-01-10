@@ -3,7 +3,8 @@
 This is a micro certified os kernel implemented in C. It runs on qemu simulator.
 
 This is the master branch.
-PLEASE CHECK APPROPRIATE LAB BRANCHES TO SEE REAL CODE
+
+**PLEASE CHECK APPROPRIATE LAB BRANCHES TO SEE REAL CODE**
 
 ## Feature
 
@@ -17,7 +18,7 @@ PLEASE CHECK APPROPRIATE LAB BRANCHES TO SEE REAL CODE
 ## Credits to
 This project is a collection of labs of CS 422/522 Operating Systems at Yale, 2015 Fall.
 
-The course is lectured by Prof. Zhong Shao and the labs are instructed by Newman Wu.
+The course is lectured by Prof. Zhong Shao@zhong-shao and the labs are instructed by Newman Wu@ashepay
 
 For more information about this course and labs, please visit the course webpage [http://flint.cs.yale.edu/cs422/](http://flint.cs.yale.edu/cs422/) 
 ## Author
