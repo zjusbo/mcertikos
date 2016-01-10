@@ -1,8 +1,0 @@
-## Certified OS Kernel
-
-This is a micro certified os kernel implemented in C. It runs in qemu simulator. 
-
-
-
-This is the master branch.
-Please check out appropriate lab branches.
