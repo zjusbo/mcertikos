@@ -19,6 +19,6 @@ This project is a collection of labs of CS 422/522 Operating Systems at Yale, 20
 
 The course is lectured by Prof. Zhong Shao and the labs are instructed by Newman Wu.
 
-For more information about this course and labs, please visit the course webpage (http://flint.cs.yale.edu/cs422/)[http://flint.cs.yale.edu/cs422/] 
+For more information about this course and labs, please visit the course webpage [http://flint.cs.yale.edu/cs422/](http://flint.cs.yale.edu/cs422/) 
 ## Author
 Bo Song, Haoliang Zhang
