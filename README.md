@@ -1,4 +1,4 @@
-## Certified OS Kernel
+## Certified OS Kernel (mCertiKOS kernel)
 
 This is a micro certified os kernel implemented in C. It runs on qemu simulator.
 
