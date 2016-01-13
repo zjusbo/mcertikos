@@ -4,7 +4,7 @@ This is a micro certified os kernel implemented in C. It runs on qemu simulator.
 
 This is the master branch.
 
-**PLEASE CHECK APPROPRIATE LAB BRANCHES TO SEE REAL CODE**
+**PLEASE CHECK APPROPRIATE LAB BRANCHES TO SEE SOURCE CODE**
 
 ## Features
 
