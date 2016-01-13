@@ -23,5 +23,6 @@ The course is lectured by Prof. [Zhong Shao](https://github.com/zhong-shao) and 
 ## References
  - course webpage [http://flint.cs.yale.edu/cs422/](http://flint.cs.yale.edu/cs422/) 
  - instructions for installing QEMU [http://flint.cs.yale.edu/cs422/tools/index.html](http://flint.cs.yale.edu/cs422/tools/index.html)
+
 ## Author
 Bo Song, Haoliang Zhang
