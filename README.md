@@ -16,7 +16,7 @@ This is the master branch.
 - **lab6** inter processes communication(IPC), shell
 
 ## Credits to
-This project is a collection of labs of CS 422/522 Operating Systems at Yale, 2015 Fall.
+This project is an archive of labs of CS 422/522 Operating Systems at Yale, 2015 Fall.
 
 The course is lectured by Prof. [Zhong Shao](https://github.com/zhong-shao) and the labs are instructed by [Newman Wu](https://github.com/ashepay)
 
